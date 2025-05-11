@@ -1,0 +1,29 @@
+---
+// src/components/Header.astro
+---
+
+<header id="header" class="fixed-top d-flex align-items-center header-transparent">
+    <div class="container d-flex align-items-center justify-content-between">
+      <div class="logo">
+        <h1><a href="index.html"><span>Hangman Game</span></a></h1>
+      </div>
+      
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto active" href="#hero">Inicio</a></li>
+          <li><a class="nav-link scrollto" href="#features">Manuales</a></li>
+          <li><a class="nav-link scrollto" href="#gallery">Galería</a></li>
+          <li><a class="nav-link scrollto" href="#team">Equipo</a></li>
+          <li><a class="nav-link scrollto" href="tablageneral.html">Tabla general</a></li>
+          <li class="dropdown">
+            <a href="#"><span>Acciones</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="./php/registro.php">Registrarse</a></li>
+              <li><a href="./php/login.php">Iniciar sesión</a></li>
+            </ul>
+          </li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+    </div>
+  </header>

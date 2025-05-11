@@ -1,0 +1,32 @@
+---
+const modalId = "modalResult";
+const titleId = "modalTitleId2";
+---
+<div class="modal fade" id={modalId} tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+  role="dialog" aria-labelledby={titleId} aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id={titleId}>Resultado</h5>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-primary">
+            <thead>
+              <tr>
+                <th scope="col">Dato</th>
+                <th scope="col">Valor</th>
+              </tr>
+            </thead>
+            <tbody id="resultTabla">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+          onclick="hangmanApp.valida();">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>

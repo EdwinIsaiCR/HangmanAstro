@@ -1,0 +1,129 @@
+
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #82ade58a
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  --color: #E1E1E1;
+  background-color: #F3F3F3;
+  background-image: linear-gradient(0deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent),
+      linear-gradient(90deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent);
+  background-size: 55px 55px;
+}
+
+
+.logo img {
+  width: 50px;
+  height: auto; 
+  margin-right: 20px;
+}
+
+ul {
+  width: 100%;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  text-align: justify;
+  justify-content: space-between;
+ 
+}
+
+
+ul .left{
+  
+  display: flex;
+  flex-direction: row;
+}
+ul .right{
+  right: 10%;
+  display: flex;
+  flex-direction: row;
+}
+
+li {
+  margin-right: 20px;
+}
+
+a {
+  text-decoration: none;
+  color: #454444;
+}
+
+a:hover {
+  border-bottom: 2px solid #454444;
+}
+
+.submenu {
+  display: none;
+  position: absolute;
+  background-color: #555;
+  padding: 10px;
+}
+
+li:hover .submenu {
+  display: block;
+}
+
+.submenu a {
+  display: block;
+  color: #454444;
+  text-decoration: none;
+  margin: 5px 0;
+}
+
+#logout-btn {
+  background-color: #555;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+#logout-btn:hover {
+  background-color: #777;
+}
+
+
+.floating-div {
+  height: 100vh;
+  width: 70%;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 20px;
+  text-align: center;
+  margin: auto; /* Centra horizontalmente usando margin: auto; */
+}
+
+.content {
+  display: none;
+  text-align: center;
+}
+
+.visible {
+  display: block;
+}
+
+@media (max-width:600px){
+  li {
+    margin-right: 0px;
+  }
+  .submenu {
+    padding: 0px 0px;
+  }
+  a:hover {
+    border-bottom: 0px solid #454444;
+  }
+  ul .left{
+    flex-direction: column;
+  }
+  ul .right{
+    flex-direction: column;
+  }
+}
