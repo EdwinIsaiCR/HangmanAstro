@@ -59,6 +59,13 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
   </main>
 </TablaLayout>
 
+<script>
+  // Define la configuración global
+  window.appConfig = {
+    apiUrl: import.meta.env.PUBLIC_API_URL
+  };
+</script>
+
 <script type="module">
   // Espera a que el DOM esté cargado
   document.addEventListener('DOMContentLoaded', async () => {
@@ -68,7 +75,8 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
     const loadingDiv = document.getElementById("loading");
 
     try {
-      const response = await fetch("https://backendhangmanastro-production.up.railway.app/api/arenagame/tablaGeneral");
+
+      const response = await fetch(`${window.appConfig.apiUrl}/api/arenagame/tablaGeneral`);
       const data = await response.json();
 
       // Oculta el loader

@@ -3,7 +3,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import LoadingSpinner from "../components/LoadingSpinner.astro";
 import ResultModal from "../components/modals/ResultModal.astro";
-
 // Styles
 import "../assets/css/arenagame.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
@@ -228,6 +227,13 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 
   <Fragment slot="scripts">
     <!-- Then initialize the game -->
+    <script>
+      // Accede a la variable inyectada por Astro
+      const apiUrl = import.meta.env.PUBLIC_API_URL;
+      console.log("API URL:", apiUrl); // Verifica en consola
+      window.API_URL = apiUrl;
+    </script>
+    
     <script is:inline>
       // Todo el código de hangmanApp.js aquí
       const hangmanApp = {
@@ -301,7 +307,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 
         async leerVerbos() {
           try {
-            const data = await fetch("http://localhost:3000/api/words");
+            const data = await fetch(`${window.API_URL}/api/words`);
             const verbos = await data.json();
             this.verbos = verbos.data;
             console.log("verbos", this.verbos);
@@ -530,7 +536,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           console.log("datosEnviar", datosEnviar.nombre);
           try {
             const response = await fetch(
-              "http://localhost:3000/api/arenagame/nuevo",
+              `${window.API_URL}/api/arenagame/nuevo`,
               {
                 method: "POST",
                 headers: {
@@ -564,7 +570,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           };
 
           try {
-            await fetch("http://localhost:3000/api/arenagame/fin", {
+            await fetch(`${window.API_URL}/api/arenagame/fin`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
