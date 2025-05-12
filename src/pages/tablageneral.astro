@@ -80,7 +80,9 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
       const data = await response.json();
 
       // Oculta el loader
-      loadingDiv.classList.add("quitar");
+      if (loadingDiv && loadingDiv.parentNode) {
+        loadingDiv.parentNode.removeChild(loadingDiv);
+      }
       // Muestra el modal
       myModal.show();
 
