@@ -14,12 +14,13 @@ const { title } = Astro.props;
   integrity="sha384-..."
   crossorigin="anonymous"
 />
+<link href="./img/hangman_logo_blue.png" rel="icon" />
 <script src="../assets/bootstrap/js/bootstrap.bundle.js"></script>
   <slot name="head" />
 </head>
 <body>
   <slot />
   <!-- Script slot for page-specific JS -->
-  <slot name="scripts" />
+  <slot />
 </body>
 </html>
