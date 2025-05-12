@@ -225,8 +225,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
     </div>
   </main>
 
-  <Fragment slot="scripts">
-    <!-- Then initialize the game -->
     <script>
       // Accede a la variable inyectada por Astro
       const apiUrl = import.meta.env.PUBLIC_API_URL;
@@ -609,5 +607,4 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         hangmanApp.init();
       });
     </script>
-  </Fragment>
 </BaseLayout>
