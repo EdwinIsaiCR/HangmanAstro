@@ -1,14 +1,12 @@
 ---
 // src/pages/arenagame.astro
-import BaseLayout from "../layouts/BaseLayout.astro";
-import LoadingSpinner from "../components/LoadingSpinner.astro";
-import ResultModal from "../components/modals/ResultModal.astro";
+import ArenaLayout from "../layouts/ArenaLayout.astro";
 // Styles
 import "../assets/css/arenagame.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 ---
 
-<BaseLayout title="Jugar en Arena">
+<ArenaLayout title="Jugar en Arena">
   <main>
     <div
       id="loading"
@@ -352,17 +350,14 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           const verbo = this.verbos[key];
           this.verbos.splice(key, 1);
 
-          // Verifica si después de eliminar este verbo ya no quedan más
           if (this.verbos.length === 0) {
-            // Asegura que el juego termine si este era el último verbo
-            setTimeout(() => this.terminar(), 500); // pequeño delay opcional para UX
+            setTimeout(() => this.terminar(), 500);
           }
 
           return verbo;
         },
 
         iniciar() {
-          // Reset hangman images
           for (let i = 2; i <= 7; i++) {
             document.getElementById(`img${i}`).style.visibility = "hidden";
           }
@@ -413,7 +408,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           sonido.play();
 
           if (this.verboArray.includes(letra)) {
-            // Correct letter
             this.verboArray.forEach((car, ind) => {
               if (car === letra) {
                 this.verboDashes[ind] = car;
@@ -431,25 +425,19 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
               this.adivinarPasado();
             }
           } else {
-            // Incorrect letter
             this.intentos--;
             this.errores++;
             this.puntos = Math.max(0, this.puntos - 1);
             this.spanPuntos.innerHTML = this.puntos;
-
-            // Update hangman image
             const imgId = 7 - this.intentos;
             if (imgId >= 2 && imgId <= 7) {
               document.getElementById(`img${imgId}`).style.visibility =
                 "visible";
             }
 
-            // Show clue after certain number of errors
             if (this.errores === this.pistaDespuesDe) {
               this.spanPista.classList.remove("oculto");
             }
-
-            // Game over if no more attempts
             if (this.errores === 6) {
               this.creaFeedback();
               this.vidas--;
@@ -457,7 +445,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             }
           }
 
-          // Remove the button
           boton.disabled = true;
           boton.classList.remove("btn-outline-primary");
           boton.classList.add("btn-secondary");
@@ -480,7 +467,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           const pasadoOk = this.verboJuega["simplepast"].toLowerCase().trim();
           const pasadoTest = this.pasadoUsr.value.toLowerCase().trim();
 
-          let tipoTest = "r"; // Default to regular
+          let tipoTest = "r";
           for (const tipo of this.tipoUsr) {
             if (tipo.checked) {
               tipoTest = tipo.value;
@@ -576,7 +563,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         },
 
         async terminar() {
-          // Eliminar todos los spinners (no solo ocultar)
           const allSpinners = document.querySelectorAll(
             '.spinner-border, [role="status"]',
           );
@@ -636,7 +622,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         },
 
         setupEventListeners() {
-          // Listener para el formulario de nombre
           const nameForm = document.querySelector("#modalNombre form");
           if (nameForm) {
             nameForm.addEventListener("submit", (e) => {
@@ -645,7 +630,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             });
           }
 
-          // Listener para el botón Cancelar
           const cancelBtn = document.querySelector(
             "#modalNombre [data-bs-dismiss='modal']",
           );
@@ -655,7 +639,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             });
           }
 
-          // Listener para el botón Ok de resultados
           const resultOkBtn = document.querySelector(
             "#modalResult button[data-bs-dismiss='modal']",
           );
@@ -665,7 +648,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             });
           }
 
-          // Listener para el botón Rendirse
           const surrenderBtn = document.getElementById("btnRendirse");
           if (surrenderBtn) {
             surrenderBtn.addEventListener("click", () => {
@@ -673,7 +655,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             });
           }
 
-          // Listener para el formulario de pasado simple
           const pastForm = document.getElementById("formulario");
           if (pastForm) {
             pastForm.addEventListener("submit", (e) => {
@@ -684,7 +665,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         },
 
         init() {
-          // Initialize elements
           this.spanVidas = document.querySelector(".spanVidas");
           this.spanPuntos = document.querySelector(".spanPuntos");
           this.spanVerbo = document.querySelector(".spanVerbo");
@@ -699,20 +679,16 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           this.tipoUsr = document.getElementsByName("tipoV");
           this.spinner = document.getElementById("loading");
 
-          // Configure all event listeners
           this.setupEventListeners();
 
-          // Initialize game if elements are present
           if (this.spanVidas && this.spanPuntos) {
             this.spanPuntos.innerHTML = "0";
           }
         },
       };
 
-      // Controlled initialization
       document.addEventListener("DOMContentLoaded", () => {
         try {
-          // Eliminar todos los spinners (no solo ocultar)
           const spinners = document.querySelectorAll(
             '.spinner-border, [role="status"]',
           );
@@ -722,22 +698,16 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             }
           });
 
-          // Initialize modal
           hangmanApp.modalNombre = new bootstrap.Modal(
             document.getElementById("modalNombre"),
           );
-
-          // Show modal
           hangmanApp.modalNombre.show();
 
-          // Initialize app
           hangmanApp.init();
         } catch (error) {
           console.error("Error en inicialización:", error);
-          // Retry after a short delay if it fails
           setTimeout(() => {
             try {
-              // Eliminar todos los spinners nuevamente (no solo ocultar)
               const spinners = document.querySelectorAll(
                 '.spinner-border, [role="status"]',
               );
@@ -782,4 +752,4 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
       display: none !important;
     }
   </style>
-</BaseLayout>
+</ArenaLayout>
