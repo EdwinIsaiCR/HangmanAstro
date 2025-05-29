@@ -308,6 +308,7 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             const numLivesInput = document.getElementById("numLives");
             const showHintsCheckbox = document.getElementById("showHints");
             const cluesInputs = document.getElementById("errorNumber");
+            const selectList = document.getElementById("wordListSelect");
 
             // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -715,29 +716,32 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
         }
 
         function populateWordListSelect(lists) {
-            console.log("Listas recibidas:", lists.data);
-            const select = document.getElementById("wordListSelect");
+    console.log("Listas recibidas:", lists.data);
+    const selectList = document.getElementById("wordListSelect"); // ✅ mover aquí
 
-            // Verificar si hay listas y mostrarlas
-            if (lists.data && lists.data.length > 0) {
-                // Agregar nuevas opciones
-                lists.data.forEach((list) => {
-                    const option = document.createElement("option");
-                    option.value = list.id;
-                    option.textContent = list.listname;
-                    select.appendChild(option);
-                });
-            } else {
-                console.log("No hay listas disponibles");
-                // Opcional: agregar una opción indicando que no hay listas
-                const option = document.createElement("option");
-                option.value = "0";
-                option.textContent = "No tienes listas creadas";
-                option.disabled = true;
-                option.selected = true;
-                select.appendChild(option);
-            }
-        }
+    if (!selectList) {
+        console.error('No se encontró el elemento con id "wordListSelect".');
+        return;
+    }
+
+    // Verificar si hay listas y mostrarlas
+    if (lists.data && lists.data.length > 0) {
+        lists.data.forEach((list) => {
+            const option = document.createElement("option");
+            option.value = list.id;
+            option.textContent = list.listname;
+            selectList.appendChild(option);
+        });
+    } else {
+        console.log("No hay listas disponibles");
+        const option = document.createElement("option");
+        option.value = "0";
+        option.textContent = "No tienes listas creadas";
+        option.disabled = true;
+        option.selected = true;
+        selectList.appendChild(option);
+    }
+}
 
         function toggleLivesInput() {
             const checkbox = document.getElementById("unlimitedLives");
