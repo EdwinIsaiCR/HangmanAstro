@@ -295,11 +295,11 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
         )
     }
 
-<script>
-    // Accede a la variable inyectada por Astro
-    const apiUrl = import.meta.env.PUBLIC_API_URL;
-    window.API_URL = apiUrl;
-  </script>
+    <script>
+        // Accede a la variable inyectada por Astro
+        const apiUrl = import.meta.env.PUBLIC_API_URL;
+        window.API_URL = apiUrl;
+    </script>
 
     <script>
         // Initialize form state
@@ -356,8 +356,29 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                         `${window.API_URL}/api/lists?userId=${userData.id}`,
                     );
                     if (response.ok) {
-                        const lists = await response.json();
-                        populateWordListSelect(lists);
+                        const result = await response.json();
+
+                        // Verificar explícitamente si hay datos
+                        if (result.success && result.data.length > 0) {
+                            populateWordListSelect(result);
+                        } else {
+                            // Manejar caso sin listas
+                            populateWordListSelect({
+                                success: true,
+                                data: [],
+                                message:
+                                    result.message ||
+                                    "No tienes listas creadas",
+                            });
+                        }
+                    } else {
+                        // Manejar error de la API
+                        console.error("Error en la respuesta del servidor");
+                        populateWordListSelect({
+                            success: false,
+                            data: [],
+                            message: "Error al cargar las listas",
+                        });
                     }
                 } catch (error) {
                     console.error("Error fetching lists:", error);
@@ -694,35 +715,38 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
         }
 
         function populateWordListSelect(lists) {
-            console.log("Listas recibidas:", lists.data);
+    console.log("Listas recibidas:", lists);
+    const select = document.getElementById("wordListSelect");
 
-            const select = document.getElementById("wordListSelect");
+    // Limpiar todas las opciones (incluyendo la primera si es un placeholder)
+    select.innerHTML = '';
 
-            // Limpiar opciones existentes (excepto la primera)
-            while (select.options.length > 1) {
-                select.remove(1);
-            }
+    // Agregar opción por defecto
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "-- Selecciona una lista --";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
 
-            // Verificar si hay listas y mostrarlas
-            if (lists.data && lists.data.length > 0) {
-                // Agregar nuevas opciones
-                lists.data.forEach((list) => {
-                    const option = document.createElement("option");
-                    option.value = list.id;
-                    option.textContent = list.listname;
-                    select.appendChild(option);
-                });
-            } else {
-                console.log("No hay listas disponibles");
-                // Opcional: agregar una opción indicando que no hay listas
-                const option = document.createElement("option");
-                option.value = "0";
-                option.textContent = "No tienes listas creadas";
-                option.disabled = true;
-                option.selected = true;
-                select.appendChild(option);
-            }
-        }
+    // Verificar si hay listas
+    if (lists.success && lists.data && lists.data.length > 0) {
+        // Agregar listas disponibles
+        lists.data.forEach((list) => {
+            const option = document.createElement("option");
+            option.value = list.id;
+            option.textContent = list.listname;
+            select.appendChild(option);
+        });
+    } else {
+        // Mostrar mensaje cuando no hay listas
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = lists.message || "No hay listas disponibles";
+        option.disabled = true;
+        select.appendChild(option);
+    }
+}
 
         function toggleLivesInput() {
             const checkbox = document.getElementById("unlimitedLives");
