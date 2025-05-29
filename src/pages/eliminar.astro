@@ -1,30 +1,7 @@
 ---
 // eliminar.astro
-import Layout from "../layouts/Layout.astro";
-import "../assets/css/editar.css";
-import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 
-
-// Obtener parámetros
-const { url } = Astro;
-const id = url.searchParams.get("id");
-const select = url.searchParams.get("select");
-
-// Redirigir si no hay selección válida
-if (!select || !["sala", "lista", "palabra"].includes(select)) {
-    return Astro.redirect("/404");
-}
 ---
-
-<Layout title="Eliminar">
-    <div class="confirmation-container">
-        <h2>Confirmar Eliminación</h2>
-        <p id="confirmation-message">¿Estás seguro de eliminar este elemento?</p>
-        <div class="button-group">
-            <button id="confirm-delete" class="btn btn-danger">Eliminar</button>
-            <a href="/dashboard" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </div>
 
     <script>
         // Accede a la variable inyectada por Astro
@@ -34,18 +11,7 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
             const select = urlParams.get('select');
-            const confirmBtn = document.getElementById('confirm-delete');
-            const message = document.getElementById('confirmation-message');
             
-            // Personalizar mensaje según el tipo
-            const typeNames = {
-                'sala': 'sala',
-                'lista': 'lista de palabras',
-                'palabra': 'palabra'
-            };
-            message.textContent = `¿Estás seguro de eliminar esta ${typeNames[select]}? Esta acción no se puede deshacer.`;
-
-            confirmBtn.addEventListener('click', async () => {
                 try {
                     let endpoint = '';
                     let body = { id };
@@ -84,7 +50,6 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                     console.error('Error:', error);
                     alert('Error de conexión al intentar eliminar');
                 }
-            });
         });
     </script>
 
@@ -109,4 +74,3 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             font-size: 1.1rem;
         }
     </style>
-</Layout>

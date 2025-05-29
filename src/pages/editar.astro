@@ -308,7 +308,14 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             const numLivesInput = document.getElementById("numLives");
             const showHintsCheckbox = document.getElementById("showHints");
             const cluesInputs = document.getElementById("errorNumber");
-            const selectList = document.getElementById("wordListSelect");
+
+            const wordSource = document.getElementById("wordSource");
+            if (wordSource) {
+                wordSource.addEventListener("change", () => toggleWordList());
+
+                // Disparar manualmente con parámetro initialLoad
+                toggleWordList(true);
+            }
 
             // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -324,6 +331,25 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                     case "sala":
                         apiUrl = `${window.API_URL}/api/rooms/room?roomId=${id}`;
                         formId = "salaForm";
+                        const storedUserData =
+                            sessionStorage.getItem("userData");
+                        // En la parte donde cargas las listas, cambia esto:
+                        if (storedUserData) {
+                            const userData = JSON.parse(storedUserData);
+                            try {
+                                const response = await fetch(
+                                    `${window.API_URL}/api/lists?userId=${userData.id}`,
+                                );
+                                if (response.ok) {
+                                    const result = await response.json();
+                                    if (result.success) {
+                                        populateWordListSelect(result);
+                                    }
+                                }
+                            } catch (error) {
+                                console.error("Error fetching lists:", error);
+                            }
+                        }
                         break;
                     case "lista":
                         apiUrl = `${window.API_URL}/api/lists/list?listId=${id}`;
@@ -338,52 +364,13 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                 const response = await fetch(apiUrl);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log("Datos recibidos:", data);
-                    if (data.data) {
-                        fillFormData(formId, select, data.data);
+                    console.log("Datos recibidos:", data, apiUrl, select);
+                    if (data) {
+                        fillFormData(formId, select, data);
                     }
                 }
             } catch (error) {
                 console.error("Error cargando datos:", error);
-            }
-
-            // Load user lists if needed
-            const storedUserData = sessionStorage.getItem("userData");
-            if (storedUserData) {
-                const userData = JSON.parse(storedUserData);
-
-                try {
-                    const response = await fetch(
-                        `${window.API_URL}/api/lists?userId=${userData.id}`,
-                    );
-                    if (response.ok) {
-                        const result = await response.json();
-
-                        // Verificar explícitamente si hay datos
-                        if (result.success && result.data.length > 0) {
-                            populateWordListSelect(result, selectList);
-                        } else {
-                            // Manejar caso sin listas
-                            populateWordListSelect({
-                                success: true,
-                                data: [],
-                                message:
-                                    result.message ||
-                                    "No tienes listas creadas",
-                            }, selectList);
-                        }
-                    } else {
-                        // Manejar error de la API
-                        console.error("Error en la respuesta del servidor");
-                        populateWordListSelect({
-                            success: false,
-                            data: [],
-                            message: "Error al cargar las listas",
-                        }, selectList);
-                    }
-                } catch (error) {
-                    console.error("Error fetching lists:", error);
-                }
             }
 
             // Initialize form states
@@ -410,35 +397,54 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             switch (type) {
                 case "sala":
                     console.log("Datos recibidos para edición:", data); // Para depuración
-                    console.log(parseInt(data.clue));
 
-                    form.roomName.value = data.roomname || "";
-                    form.roomDescription.value = data.description || "";
-                    form.unlimitedLives.checked = data.lives === -1;
-                    form.numLives.value = data.lives > 0 ? data.lives : "";
-                    form.showHints.checked = data.clue === 1 ? true : false;
+                    form.roomName.value = data.data.roomname || "";
+                    form.roomDescription.value = data.data.description || "";
+                    form.unlimitedLives.checked = data.data.lives === -1;
+                    form.numLives.value =
+                        data.data.lives > 0 ? data.data.lives : "";
+                    form.showHints.checked =
+                        data.data.clue === 1 ? true : false;
                     form.errorNumber.value =
-                        data.clueafter >= 0 ? data.clueafter : "";
+                        data.data.clueafter >= 0 ? data.data.clueafter : "";
                     form.showFeedback.checked =
-                        data.feedback == 1 ? true : false;
-                    form.randomOrder.checked = data.random == 1 ? true : false;
+                        data.data.feedback == 1 ? true : false;
+                    form.randomOrder.checked =
+                        data.data.random == 1 ? true : false;
                     form.isOpen.value =
-                        data.isopen === 1 ? "isOpen" : "isClose";
-                    form.wordSource.value = data.isgeneral === 1 ? "0" : "1";
+                        data.data.isopen === 1 ? "isOpen" : "isClose";
+                    form.wordSource.value =
+                        data.data.isgeneral === 1 ? "0" : "1";
+                    // Mostrar/ocultar el selector de listas según la fuente de palabras
+                    const wordListDiv = document.getElementById("wordList");
+                    if (wordListDiv) {
+                        wordListDiv.style.display =
+                            data.data.isgeneral === 0 ? "block" : "none";
+                    }
+
+                    // Si usa palabras de usuario, seleccionar la lista guardada
+                    if (data.data.isgeneral === 0 && data.data.lists_id) {
+                        const wordListSelect =
+                            document.getElementById("wordListSelect");
+                        if (wordListSelect) {
+                            wordListSelect.value = data.data.lists_id;
+                        }
+                    }
+
                     break;
 
                 case "lista":
-                    form.listName.value = data.listname || "";
-                    form.descripcion.value = data.description || "";
+                    form.listName.value = data[0].listname || "";
+                    form.descripcion.value = data[0].description || "";
                     break;
 
                 case "palabra":
-                    form.wordName.value = data.word || "";
-                    form.wordSpanish.value = data.spanish || "";
-                    form.typeListSelect.value = data.type || "R";
-                    form.clue.value = data.clue || "";
-                    form.wordPast.value = data.simplepast || "";
-                    form.eg.value = data.example || "";
+                    form.wordName.value = data[0].word || "";
+                    form.wordSpanish.value = data[0].spanish || "";
+                    form.typeListSelect.value = data[0].type || "R";
+                    form.clue.value = data[0].clue || "";
+                    form.wordPast.value = data[0].simplepast || "";
+                    form.eg.value = data[0].example || "";
                     break;
             }
         }
@@ -560,6 +566,12 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                             }
 
                             const listWords = await listWordsResponse.json();
+                            if (!listWords || listWords.length === 0) {
+                                alert(
+                                    "No se puede crear la sala: La lista seleccionada no tiene palabras",
+                                );
+                                return; // Detener el proceso
+                            }
                             const wordsOfList = listWords.map(
                                 (word) => word.word_id,
                             );
@@ -715,32 +727,36 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             }
         }
 
-        function populateWordListSelect(lists, selectList) {
-    console.log("Listas recibidas:", lists.data);
+        function populateWordListSelect(lists) {
+            console.log("Listas recibidas:", lists.data);
 
-    if (!selectList) {
-        console.error('No se encontró el elemento con id "wordListSelect".');
-        return;
-    }
+            const selectList = document.getElementById("wordListSelect");
 
-    // Verificar si hay listas y mostrarlas
-    if (lists.data && lists.data.length > 0) {
-        lists.data.forEach((list) => {
-            const option = document.createElement("option");
-            option.value = list.id;
-            option.textContent = list.listname;
-            selectList.appendChild(option);
-        });
-    } else {
-        console.log("No hay listas disponibles");
-        const option = document.createElement("option");
-        option.value = "0";
-        option.textContent = "No tienes listas creadas";
-        option.disabled = true;
-        option.selected = true;
-        selectList.appendChild(option);
-    }
-}
+            if (!selectList) {
+                console.error(
+                    'No se encontró el elemento con id "wordListSelect".',
+                );
+                return;
+            }
+
+            // Verificar si hay listas y mostrarlas
+            if (lists.data && lists.data.length > 0) {
+                lists.data.forEach((list) => {
+                    const option = document.createElement("option");
+                    option.value = list.id;
+                    option.textContent = list.listname;
+                    selectList.appendChild(option);
+                });
+            } else {
+                console.log("No hay listas disponibles");
+                const option = document.createElement("option");
+                option.value = "0";
+                option.textContent = "No tienes listas creadas";
+                option.disabled = true;
+                option.selected = true;
+                selectList.appendChild(option);
+            }
+        }
 
         function toggleLivesInput() {
             const checkbox = document.getElementById("unlimitedLives");
@@ -762,12 +778,22 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             }
         }
 
-        function toggleWordList() {
+        function toggleWordList(initialLoad = false) {
             const wordList = document.getElementById("wordList");
             const wordSource = document.getElementById("wordSource");
 
-            wordList.style.display =
-                wordSource.value === "1" ? "block" : "none";
+            if (wordList && wordSource) {
+                // Mostrar solo si es palabras de usuario (value="1")
+                const shouldShow = wordSource.value === "1";
+                wordList.style.display = shouldShow ? "block" : "none";
+
+                // Solo resetear si no es la carga inicial
+                if (!initialLoad && wordSource.value === "0") {
+                    const wordListSelect =
+                        document.getElementById("wordListSelect");
+                    if (wordListSelect) wordListSelect.value = "0";
+                }
+            }
         }
 
         // Add event listeners
@@ -777,8 +803,5 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
         document
             .getElementById("showHints")
             ?.addEventListener("change", toggleCluesInput);
-        document
-            .getElementById("wordSource")
-            ?.addEventListener("change", toggleWordList);
     </script>
 </Layout>

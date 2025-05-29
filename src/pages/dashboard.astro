@@ -287,7 +287,7 @@ let roomsData = [];
 		// Accede a la variable inyectada por Astro
 		const apiUrl = import.meta.env.PUBLIC_API_URL;
 		window.API_URL = apiUrl;
-	  </script>
+	</script>
 
 	<script is:inline>
 		// 1. Cargar datos del usuario
@@ -311,7 +311,6 @@ let roomsData = [];
 						el.textContent = `Tiempo Jugado: ${userData.hrsPlayed}`;
 					}
 				});
-
 			} catch (error) {
 				console.error("Error:", error);
 			}
@@ -330,13 +329,22 @@ let roomsData = [];
 
 				const { data: rooms } = await response.json();
 
+				//obtener lista de la sala
+				const listResponse = await fetch(
+					`${window.API_URL}/api/lists?userId=${userData.id}`,
+				);
+				if (!listResponse.ok)
+					throw new Error(`Error: ${listResponse.status}`);
+				const { data: lists } = await listResponse.json();
+				console.log("Listas:", lists);
+
 				if (!rooms?.length) {
 					container.innerHTML = "<p>No hay salas registradas.</p>";
 					return;
 				}
 
 				// Generar HTML
-				const tableHTML = generateRoomsTable(rooms);
+				const tableHTML = generateRoomsTable(rooms, lists);
 				container.innerHTML = tableHTML;
 
 				// Generar QRs después de que el DOM se actualice
@@ -351,7 +359,7 @@ let roomsData = [];
 		}
 
 		// 3. Generar tabla de salas
-		function generateRoomsTable(rooms) {
+		function generateRoomsTable(rooms, lists) {
 			return `
 		  <table>
 			<thead>
@@ -386,14 +394,14 @@ let roomsData = [];
 				  <td>${room.feedback === 1 ? "Si" : "No"}</td>
 				  <td>${room.random === 1 ? "Si" : "No"}</td>
 				  <td>${room.isopen === 1 ? "Si" : "No"}</td>
-				  <td>${room.isgeneral === 1 ? "Sistema" : `Lista: ${room.listName || ""}`}</td>
+				  <td>${room.isgeneral === 1 ? "Sistema" : `Lista: ${lists.find((list) => list.id === room.lists_id)?.listname}`}</td>
 				  <td>${room.timestamp}</td>
 				  <td>${room.roomcode}</td>
 				  <td><div id="qrcode-${i}"></div></td>
 				  <td>
 					<a href="/editar?id=${room.id}&select=sala">Editar</a>
 					<a href="/restablecer?id=${room.id}">Restablecer horario</a>
-					<a href="/eliminar?id=${room.id}&select=sala" onclick="return confirm('¿Estás seguro de eliminar la sala ${room.id}?')">Eliminar</a>
+					<a href="#" onclick="showDeleteModal(${room.id}, 'sala', 'la sala ${room.roomname}')" class="users-table--delete">Eliminar</a>
 					<a href="/inforoom?id=${room.id}&select=sala">Ver mas</a>
 				  </td>
 				</tr>
@@ -407,24 +415,26 @@ let roomsData = [];
 
 		// 4. Generar códigos QR (con verificación)
 		async function generateQRCodes(rooms) {
-    console.log('Generando QR codes para', rooms.length, 'salas');
-    
-    rooms.forEach((room, i) => {
-        const element = document.getElementById(`qrcode-${i}`);
-        if (!element) {
-            console.warn(`Elemento qrcode-${i} no encontrado`);
-            return;
-        }
+			console.log("Generando QR codes para", rooms.length, "salas");
 
-        try {
-            // Construir la URL del QR (ajusta según tu necesidad)
-            const qrString = room.qrstring || `${window.location.origin}/unirseSala?codigo=${room.roomcode}`;
-            
-            // Usar QR Server API (servicio gratuito y confiable)
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&format=png&data=${encodeURIComponent(qrString)}`;
-            
-            // Crear la imagen del QR
-            element.innerHTML = `
+			rooms.forEach((room, i) => {
+				const element = document.getElementById(`qrcode-${i}`);
+				if (!element) {
+					console.warn(`Elemento qrcode-${i} no encontrado`);
+					return;
+				}
+
+				try {
+					// Construir la URL del QR (ajusta según tu necesidad)
+					const qrString =
+						room.qrstring ||
+						`${window.location.origin}/unirseSala?codigo=${room.roomcode}`;
+
+					// Usar QR Server API (servicio gratuito y confiable)
+					const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&format=png&data=${encodeURIComponent(qrString)}`;
+
+					// Crear la imagen del QR
+					element.innerHTML = `
                 <div style="text-align: center;">
                     <img 
                         src="${qrUrl}" 
@@ -437,26 +447,31 @@ let roomsData = [];
                     />
                 </div>
             `;
-            
-            console.log(`QR generado para sala ${room.roomcode}:`, qrUrl);
-            
-        } catch (error) {
-            console.error(`Error generando QR para sala ${room.id}:`, error);
-            // Fallback inmediato
-            element.innerHTML = createQRFallback(room.roomcode);
-        }
-    });
-}
 
-// Función de manejo de errores para las imágenes QR
-function handleQRError(img, roomcode) {
-    console.error('Error cargando imagen QR para:', roomcode);
-    img.parentElement.innerHTML = createQRFallback(roomcode);
-}
+					console.log(
+						`QR generado para sala ${room.roomcode}:`,
+						qrUrl,
+					);
+				} catch (error) {
+					console.error(
+						`Error generando QR para sala ${room.id}:`,
+						error,
+					);
+					// Fallback inmediato
+					element.innerHTML = createQRFallback(room.roomcode);
+				}
+			});
+		}
 
-// Crear fallback cuando el QR no se puede cargar
-function createQRFallback(roomcode) {
-    return `
+		// Función de manejo de errores para las imágenes QR
+		function handleQRError(img, roomcode) {
+			console.error("Error cargando imagen QR para:", roomcode);
+			img.parentElement.innerHTML = createQRFallback(roomcode);
+		}
+
+		// Crear fallback cuando el QR no se puede cargar
+		function createQRFallback(roomcode) {
+			return `
         <div style="
             width: 100px; 
             height: 100px; 
@@ -473,7 +488,7 @@ function createQRFallback(roomcode) {
             <small style="font-size: 10px; color: #6c757d; margin-top: 4px;">Código de sala</small>
         </div>
     `;
-}
+		}
 
 		// Función para cargar palabras bajo demanda
 		async function loadWords() {
@@ -533,7 +548,7 @@ function createQRFallback(roomcode) {
               <th>${word.example}</th>
               <th>
                 <a href="/editar?id=${word.id}&select=palabra" class="users-table--edit">Editar</a><br/>
-                <a href="/eliminar?id=${word.id}&select=palabra" onclick="return confirm('¿Estás seguro de eliminar la palabra ${word.id}?')" class="users-table--delete">Eliminar</a>
+                <a href="#" onclick="showDeleteModal(${word.id}, 'palabra', 'la palabra ${word.word}')" class="users-table--delete">Eliminar</a>
               </th>
             </tr>
           `;
@@ -613,7 +628,7 @@ function createQRFallback(roomcode) {
               <th>${list.description}</th>
               <th>
                 <a href="/editar?id=${list.id}&select=lista" class="users-table--edit">Editar</a><br/>
-                <a href="/eliminar?id=${list.id}&select=lista" onclick="return confirm('¿Estás seguro de eliminar la lista ${list.id}?')" class="users-table--delete">Eliminar</a>
+                <a href="#" onclick="showDeleteModal(${list.id}, 'lista', 'la lista ${list.listname}')" class="users-table--delete">Eliminar</a>
               </th>
               <th><a href="/addWords?id=${list.id}" class="users-table--edit">Control de palabras</a></th>
             </tr>
@@ -640,5 +655,156 @@ function createQRFallback(roomcode) {
 				element.style.display = isHidden ? "block" : "none";
 			}
 		}
+		// Variables para el modal
+		let currentDeleteId = null;
+		let currentDeleteType = null;
+
+		// Mostrar modal de confirmación
+		function showDeleteModal(id, type, name) {
+			currentDeleteId = id;
+			currentDeleteType = type;
+
+			const modal = document.getElementById("deleteModal");
+			const modalTitle = document.getElementById("modal-title");
+			const modalMessage = document.getElementById("modal-message");
+
+			modalTitle.textContent = `Eliminar ${type === "sala" ? "Sala" : type === "lista" ? "Lista" : "Palabra"}`;
+			modalMessage.textContent = `¿Estás seguro de eliminar ${name}?`;
+
+			modal.style.display = "flex";
+
+			// Configurar eventos una sola vez
+			if (!modal._eventsConfigured) {
+				document
+					.getElementById("confirm-delete")
+					.addEventListener("click", deleteItem);
+				document
+					.getElementById("cancel-delete")
+					.addEventListener("click", () => {
+						modal.style.display = "none";
+					});
+				document
+					.querySelector(".close-modal")
+					.addEventListener("click", () => {
+						modal.style.display = "none";
+					});
+				modal._eventsConfigured = true;
+			}
+		}
+
+		// Función para eliminar el elemento
+		async function deleteItem() {
+			const modal = document.getElementById("deleteModal");
+			modal.style.display = "none";
+
+			if (!currentDeleteId || !currentDeleteType) return;
+
+			try {
+				let endpoint = "";
+				let body = { id: currentDeleteId };
+
+				switch (currentDeleteType) {
+					case "sala":
+						endpoint = `${window.API_URL}/api/rooms/${currentDeleteId}`;
+						break;
+					case "lista":
+						endpoint = `${window.API_URL}/api/lists/${currentDeleteId}`;
+						break;
+					case "palabra":
+						endpoint = `${window.API_URL}/api/words/${currentDeleteId}`;
+						body = { ...body, isactive: 0 }; // Soft delete
+						break;
+				}
+
+				const response = await fetch(endpoint, {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${localStorage.getItem("token")}`,
+					},
+					body: JSON.stringify(body),
+				});
+
+				if (response.ok) {
+					alert("Elemento eliminado correctamente");
+					// Recargar la sección correspondiente
+					switch (currentDeleteType) {
+						case "sala":
+							await loadRooms();
+							break;
+						case "lista":
+							await loadLists();
+							break;
+						case "palabra":
+							await loadWords();
+							break;
+					}
+				} else {
+					const error = await response.json();
+					alert(`Error: ${error.message || "No se pudo eliminar"}`);
+				}
+			} catch (error) {
+				console.error("Error:", error);
+				alert("Error de conexión al intentar eliminar");
+			} finally {
+				currentDeleteId = null;
+				currentDeleteType = null;
+			}
+		}
 	</script>
+	<!-- Modal de confirmación -->
+	<div id="deleteModal" class="modal" style="display: none;">
+		<div class="modal-content">
+			<span class="close-modal">&times;</span>
+			<h3 id="modal-title">Confirmar eliminación</h3>
+			<p id="modal-message">
+				¿Estás seguro de que deseas eliminar este elemento?
+			</p>
+			<div class="modal-buttons">
+				<button id="confirm-delete" class="btn btn-danger"
+					>Eliminar</button
+				>
+				<button id="cancel-delete" class="btn btn-secondary"
+					>Cancelar</button
+				>
+			</div>
+		</div>
+	</div>
+
+	<style>
+		.modal {
+			position: fixed;
+			z-index: 1000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.modal-content {
+			background: white;
+			padding: 20px;
+			border-radius: 8px;
+			width: 80%;
+			max-width: 500px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		.close-modal {
+			float: right;
+			font-size: 24px;
+			cursor: pointer;
+		}
+
+		.modal-buttons {
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+			margin-top: 20px;
+		}
+	</style>
 </Layout>
