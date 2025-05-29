@@ -1,7 +1,644 @@
 ---
+// src/pages/dashboard.astro
 import Layout from "../layouts/Layout.astro";
+import "../assets/css/styledash.css";
+import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+import "../assets/css/salas.css";
+import QRCode from "../components/QRCode.astro";
+
+// Variables que se llenarán desde el cliente
+let userData = null;
+let userId = null;
+let roomsData = [];
+
+// En el servidor, solo preparamos las variables
+// Los datos reales se cargarán desde el cliente
 ---
 
-<Layout>
-	<h1>Dashboard, iniciaste sesion</h1>
+<Layout title="Dashboard">
+	<!-- Navbar -->
+	<nav class="navbar navbar-expand-lg bg-body-tertiary">
+		<div class="container-fluid">
+			<div class="logo">
+				<img src="/img/stickman_admin.png" alt="Logo" />
+			</div>
+			<button
+				class="navbar-toggler"
+				type="button"
+				data-bs-toggle="collapse"
+				data-bs-target="#navbarNavDropdown"
+				aria-controls="navbarNavDropdown"
+				aria-expanded="false"
+				aria-label="Toggle navigation"
+			>
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse nav" id="navbarNavDropdown">
+				<ul class="navbar-nav">
+					<div class="left">
+						<li class="nav-item">
+							<p class="nav-link scrollto">ADMINISTRADOR SALAS</p>
+						</li>
+						<li class="nav-item">
+							<p class="nav-link">¡Hola!,</p>
+						</li>
+						<li class="nav-item">
+							<p class="nav-link">Tiempo Jugado:</p>
+						</li>
+					</div>
+					<div class="right">
+						<li class="nav-item">
+							<a class="nav-link" href="/arenagame"
+								>Jugar modo arena</a
+							>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/unirseSala"
+								>Unirse a sala</a
+							>
+						</li>
+						<li class="nav-item dropdown">
+							<a
+								class="nav-link dropdown-toggle"
+								href="#"
+								role="button"
+								data-bs-toggle="dropdown"
+								aria-expanded="false"
+							>
+								Salas
+							</a>
+							<ul class="submenu dropdown-menu">
+								<li><a href="/crear?select=sala">Crear</a></li>
+								<li>
+									<a
+										href="#sala_consultar"
+										onclick="loadRooms(); toggleContent('sala_consultar')"
+										>Consultar</a
+									>
+								</li>
+							</ul>
+						</li>
+						<li class="nav-item dropdown">
+							<a
+								class="nav-link dropdown-toggle"
+								href="#"
+								role="button"
+								data-bs-toggle="dropdown"
+								aria-expanded="false"
+							>
+								Palabras
+							</a>
+							<ul class="submenu dropdown-menu">
+								<li>
+									<a href="/crear?select=palabra">Crear</a>
+								</li>
+								<li>
+									<a
+										href="#palabras_consultar"
+										onclick="loadWords(); toggleContent('palabras_consultar')"
+										>Consultar</a
+									>
+								</li>
+							</ul>
+						</li>
+						<li class="nav-item dropdown">
+							<a
+								class="nav-link dropdown-toggle"
+								href="#"
+								role="button"
+								data-bs-toggle="dropdown"
+								aria-expanded="false"
+							>
+								Listas
+							</a>
+							<ul class="submenu dropdown-menu">
+								<li><a href="/crear?select=lista">Crear</a></li>
+								<li>
+									<a
+										href="#listas_consultar"
+										onclick="loadLists(); toggleContent('listas_consultar')"
+										>Consultar</a
+									>
+								</li>
+							</ul>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link scrollto" href="/tablageneral"
+								>Tabla general</a
+							>
+						</li>
+						<li class="nav-item">
+							<a href="/cerrarsesion">
+								<button id="logout-btn">Cerrar sesión</button>
+							</a>
+						</li>
+					</div>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Contenido principal -->
+	<main>
+		<!-- Sección de Salas -->
+		<div class="salas_consultar">
+			<div id="sala_consultar" class="content" style="display: none;">
+				<h2>Tus salas</h2>
+				<div class="container">
+					<div id="rooms-container">
+						{
+							roomsData.length > 0 ? (
+								<table>
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>Nombre</th>
+											<th>Descripción</th>
+											<th>Vidas</th>
+											<th>Pista</th>
+											<th>Pista Después de</th>
+											<th>¿Mostrar Feedback?</th>
+											<th>¿Palabras Random?</th>
+											<th>¿Está Abierta?</th>
+											<th>Fuente de palabras</th>
+											<th>Creada</th>
+											<th>Código de Sala</th>
+											<th>QR</th>
+											<th>Acciones</th>
+										</tr>
+									</thead>
+									<tbody>
+										{roomsData.map((room, index) => (
+											<tr>
+												<th>{room.id}</th>
+												<th>{room.roomname}</th>
+												<th>{room.description}</th>
+												<th>
+													{room.lives === -1
+														? "ilimitadas"
+														: room.lives}
+												</th>
+												<th>
+													{room.clue === 1
+														? "Si"
+														: "No"}
+												</th>
+												<th>
+													{room.clue === 1
+														? `${room.clueafter} intentos`
+														: "Desactivado"}
+												</th>
+												<th>
+													{room.feedback === 1
+														? "Si"
+														: "No"}
+												</th>
+												<th>
+													{room.random === 1
+														? "Si"
+														: "No"}
+												</th>
+												<th>
+													{room.isopen === 1
+														? "Si"
+														: "No"}
+												</th>
+												<th>
+													{room.isgeneral === 1
+														? "Sistema"
+														: `Lista: ${room.listName || ""}`}
+												</th>
+												<th>{room.timestamp}</th>
+												<th>{room.roomcode}</th>
+												<th>
+													<div
+														id={`qrcode-${index}`}
+													/>
+												</th>
+												<th>
+													<a
+														href={`/editar?id=${room.id}&select=sala`}
+														class="users-table--edit"
+													>
+														Editar
+													</a>
+													<br />
+													<a
+														href={`/restablecer?id=${room.id}`}
+														class="users-table--edit"
+													>
+														Restablecer horario
+													</a>
+													<br />
+													<a
+														href={`/eliminar?id=${room.id}&select=sala`}
+														onclick="return confirm('¿Estás seguro de eliminar la sala ${room.id}?')"
+														class="users-table--delete"
+													>
+														Eliminar
+													</a>
+													<br />
+													<a
+														href={`/inforoom?id=${room.id}&select=sala`}
+														class="users-table--more"
+													>
+														Ver mas
+													</a>
+												</th>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							) : (
+								<p>No hay salas registradas.</p>
+							)
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Sección de Palabras (carga bajo demanda) -->
+		<div class="palabras">
+			<div id="palabras_consultar" class="content" style="display: none;">
+				<h2>Tus palabras</h2>
+				<div class="container2">
+					<div id="words-container">
+						<p>Cargando palabras...</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Sección de Listas (carga bajo demanda) -->
+		<div class="listas">
+			<div id="listas_consultar" class="content" style="display: none;">
+				<h2>Tus listas</h2>
+				<div class="container3">
+					<div id="lists-container">
+						<p>Cargando listas...</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		// Accede a la variable inyectada por Astro
+		const apiUrl = import.meta.env.PUBLIC_API_URL;
+		window.API_URL = apiUrl;
+	  </script>
+
+	<script is:inline>
+		// 1. Cargar datos del usuario
+		document.addEventListener("DOMContentLoaded", async () => {
+			try {
+				const storedUserData = sessionStorage.getItem("userData");
+				if (!storedUserData) {
+					window.location.href = "/login";
+					return;
+				}
+
+				userData = JSON.parse(storedUserData);
+				console.log("Datos de usuario:", userData);
+
+				// Actualizar UI
+				document.querySelectorAll(".nav-link").forEach((el) => {
+					if (el.textContent.includes("¡Hola!")) {
+						el.textContent = `¡Hola!, ${userData.name}`;
+					}
+					if (el.textContent.includes("Tiempo Jugado")) {
+						el.textContent = `Tiempo Jugado: ${userData.hrsPlayed}`;
+					}
+				});
+
+			} catch (error) {
+				console.error("Error:", error);
+			}
+		});
+
+		// 2. Función para cargar salas (mejorada)
+		async function loadRooms() {
+			const container = document.getElementById("rooms-container");
+			container.innerHTML = "<p>Cargando salas...</p>";
+
+			try {
+				const response = await fetch(
+					`${window.API_URL}/api/rooms?userId=${userData.id}`,
+				);
+				if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+				const { data: rooms } = await response.json();
+
+				if (!rooms?.length) {
+					container.innerHTML = "<p>No hay salas registradas.</p>";
+					return;
+				}
+
+				// Generar HTML
+				const tableHTML = generateRoomsTable(rooms);
+				container.innerHTML = tableHTML;
+
+				// Generar QRs después de que el DOM se actualice
+				setTimeout(() => generateQRCodes(rooms), 100);
+			} catch (error) {
+				console.error("Error al cargar salas:", error);
+				container.innerHTML = `
+			<p class="error">Error al cargar salas</p>
+			<button onclick="loadRooms(${userData.id})">Reintentar</button>
+		  `;
+			}
+		}
+
+		// 3. Generar tabla de salas
+		function generateRoomsTable(rooms) {
+			return `
+		  <table>
+			<thead>
+			  <tr>
+				<th>ID</th>
+				<th>Nombre</th>
+				              <th>Descripción</th>
+              <th>Vidas</th>
+              <th>Pista</th>
+              <th>Pista Después de</th>
+              <th>¿Mostrar Feedback?</th>
+              <th>¿Palabras Random?</th>
+              <th>¿Está Abierta?</th>
+              <th>Fuente de palabras</th>
+              <th>Creada</th>
+              <th>Código de Sala</th>
+              <th>QR</th>
+              <th>Acciones</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  ${rooms
+					.map(
+						(room, i) => `
+				<tr>
+				  <td>${room.id}</td>
+				  <td>${room.roomname}</td>
+				  <td>${room.description}</td>
+				  <td>${room.lives === -1 ? "ilimitadas" : room.lives}</td>
+				  <td>${room.clue === 1 ? "Si" : "No"}</td>
+				  <td>${room.clue === 1 ? `${room.clueafter} intentos` : "Desactivado"}</td>
+				  <td>${room.feedback === 1 ? "Si" : "No"}</td>
+				  <td>${room.random === 1 ? "Si" : "No"}</td>
+				  <td>${room.isopen === 1 ? "Si" : "No"}</td>
+				  <td>${room.isgeneral === 1 ? "Sistema" : `Lista: ${room.listName || ""}`}</td>
+				  <td>${room.timestamp}</td>
+				  <td>${room.roomcode}</td>
+				  <td><div id="qrcode-${i}"></div></td>
+				  <td>
+					<a href="/editar?id=${room.id}&select=sala">Editar</a>
+					<a href="/restablecer?id=${room.id}">Restablecer horario</a>
+					<a href="/eliminar?id=${room.id}&select=sala" onclick="return confirm('¿Estás seguro de eliminar la sala ${room.id}?')">Eliminar</a>
+					<a href="/inforoom?id=${room.id}&select=sala">Ver mas</a>
+				  </td>
+				</tr>
+			  `,
+					)
+					.join("")}
+			</tbody>
+		  </table>
+		`;
+		}
+
+		// 4. Generar códigos QR (con verificación)
+		async function generateQRCodes(rooms) {
+    console.log('Generando QR codes para', rooms.length, 'salas');
+    
+    rooms.forEach((room, i) => {
+        const element = document.getElementById(`qrcode-${i}`);
+        if (!element) {
+            console.warn(`Elemento qrcode-${i} no encontrado`);
+            return;
+        }
+
+        try {
+            // Construir la URL del QR (ajusta según tu necesidad)
+            const qrString = room.qrstring || `${window.location.origin}/unirseSala?codigo=${room.roomcode}`;
+            
+            // Usar QR Server API (servicio gratuito y confiable)
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&format=png&data=${encodeURIComponent(qrString)}`;
+            
+            // Crear la imagen del QR
+            element.innerHTML = `
+                <div style="text-align: center;">
+                    <img 
+                        src="${qrUrl}" 
+                        alt="QR Code para sala ${room.roomcode}"
+                        width="100" 
+                        height="100"
+                        style="border: 1px solid #ddd; border-radius: 4px; display: block; margin: 0 auto;"
+                        onload="console.log('QR ${i} cargado correctamente')"
+                        onerror="handleQRError(this, '${room.roomcode}')"
+                    />
+                </div>
+            `;
+            
+            console.log(`QR generado para sala ${room.roomcode}:`, qrUrl);
+            
+        } catch (error) {
+            console.error(`Error generando QR para sala ${room.id}:`, error);
+            // Fallback inmediato
+            element.innerHTML = createQRFallback(room.roomcode);
+        }
+    });
+}
+
+// Función de manejo de errores para las imágenes QR
+function handleQRError(img, roomcode) {
+    console.error('Error cargando imagen QR para:', roomcode);
+    img.parentElement.innerHTML = createQRFallback(roomcode);
+}
+
+// Crear fallback cuando el QR no se puede cargar
+function createQRFallback(roomcode) {
+    return `
+        <div style="
+            width: 100px; 
+            height: 100px; 
+            border: 2px solid #007bff; 
+            border-radius: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            background: #f8f9fa;
+            margin: 0 auto;
+        ">
+            <strong style="font-size: 14px; color: #007bff;">${roomcode}</strong>
+            <small style="font-size: 10px; color: #6c757d; margin-top: 4px;">Código de sala</small>
+        </div>
+    `;
+}
+
+		// Función para cargar palabras bajo demanda
+		async function loadWords() {
+			const wordsContainer = document.getElementById("words-container");
+
+			try {
+				const response = await fetch(
+					`${window.API_URL}/api/words?userId=${userData.id}`,
+					{
+						credentials: "include",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					},
+				);
+
+				if (!response.ok) {
+					wordsContainer.innerHTML =
+						"<p>Error al cargar palabras.</p>";
+					return;
+				}
+
+				const wordsData = await response.json();
+
+				if (wordsData.length === 0) {
+					wordsContainer.innerHTML =
+						"<p>No hay palabras registradas.</p>";
+					return;
+				}
+
+				let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Palabra</th>
+                <th>Español</th>
+                <th>Tipo</th>
+                <th>Pista</th>
+                <th>Pasado simple</th>
+                <th>Ejemplo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+				wordsData.forEach((word) => {
+					tableHTML += `
+            <tr>
+              <th>${word.id}</th>
+              <th>${word.word}</th>
+              <th>${word.spanish}</th>
+              <th>${word.type === "I" ? "IRREGULAR" : "REGULAR"}</th>
+              <th>${word.clue}</th>
+              <th>${word.simplepast}</th>
+              <th>${word.example}</th>
+              <th>
+                <a href="/editar?id=${word.id}&select=palabra" class="users-table--edit">Editar</a><br/>
+                <a href="/eliminar?id=${word.id}&select=palabra" onclick="return confirm('¿Estás seguro de eliminar la palabra ${word.id}?')" class="users-table--delete">Eliminar</a>
+              </th>
+            </tr>
+          `;
+				});
+
+				tableHTML += `
+            </tbody>
+          </table>
+        `;
+
+				wordsContainer.innerHTML = tableHTML;
+			} catch (error) {
+				console.error("Error al cargar palabras:", error);
+				wordsContainer.innerHTML =
+					"<p>Error al conectar con el servidor.</p>";
+			}
+		}
+
+		// Función para cargar listas bajo demanda
+		async function loadLists() {
+			const listsContainer = document.getElementById("lists-container");
+
+			listsContainer.innerHTML = "<p>Cargando listas...</p>";
+
+			try {
+				const response = await fetch(
+					`${window.API_URL}/api/lists?userId=${userData.id}`,
+					{
+						credentials: "include",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					},
+				);
+
+				if (!response.ok) {
+					throw new Error(`Error HTTP: ${response.status}`);
+				}
+
+				const result = await response.json();
+
+				// Verifica la estructura de la respuesta
+				console.log("Respuesta del servidor:", result);
+
+				// Asegúrate de trabajar con un array
+				const listsData = Array.isArray(result.data)
+					? result.data
+					: Array.isArray(result)
+						? result
+						: [];
+
+				if (listsData.length === 0) {
+					listsContainer.innerHTML =
+						"<p>No hay listas registradas.</p>";
+					return;
+				}
+
+				let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre de la lista</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+                <th>Editar palabras de la lista</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+				listsData.forEach((list) => {
+					tableHTML += `
+            <tr>
+              <th>${list.id}</th>
+              <th>${list.listname}</th>
+              <th>${list.description}</th>
+              <th>
+                <a href="/editar?id=${list.id}&select=lista" class="users-table--edit">Editar</a><br/>
+                <a href="/eliminar?id=${list.id}&select=lista" onclick="return confirm('¿Estás seguro de eliminar la lista ${list.id}?')" class="users-table--delete">Eliminar</a>
+              </th>
+              <th><a href="/addWords?id=${list.id}" class="users-table--edit">Control de palabras</a></th>
+            </tr>
+          `;
+				});
+
+				tableHTML += `
+            </tbody>
+          </table>
+        `;
+
+				listsContainer.innerHTML = tableHTML;
+			} catch (error) {
+				console.error("Error al cargar listas:", error);
+				listsContainer.innerHTML =
+					"<p>Error al conectar con el servidor.</p>";
+			}
+		}
+		// Función para mostrar/ocultar secciones
+		function toggleContent(id) {
+			const element = document.getElementById(id);
+			if (element) {
+				const isHidden = element.style.display === "none";
+				element.style.display = isHidden ? "block" : "none";
+			}
+		}
+	</script>
 </Layout>

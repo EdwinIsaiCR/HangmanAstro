@@ -1,0 +1,96 @@
+---
+// src/pages/unirseSala.astro
+import Layout from '../layouts/Layout.astro';
+import '../assets/css/unirseSala.css';
+import '../assets/css/salas.css';
+
+---
+
+<Layout title="Unirse a sala">
+  <h2>Únete a una sala</h2>
+
+  <div id="message-container" class="message" style="display: none;">
+    <p id="message-text"></p>
+  </div>
+
+  <form id="join-form">
+    <label for="roomcode">Código de Sala:</label>
+    <input 
+      type="text" 
+      id="roomcode" 
+      name="roomcode" 
+      placeholder="ej. xyz7yz" 
+      required
+    />
+    <button type="submit">Unirse a la Sala</button>
+    <a href="/dashboard">
+      <button type="button" class="btn btn-danger regresar">Regresar</button>
+    </a>
+  </form>
+
+  <script>
+    // Accede a la variable inyectada por Astro
+    const apiUrl = import.meta.env.PUBLIC_API_URL;
+    window.API_URL = apiUrl;
+  </script>
+
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('join-form');
+      const messageContainer = document.getElementById('message-container');
+      const messageText = document.getElementById('message-text');
+      const storedUserData = sessionStorage.getItem("userData");
+				if (!storedUserData) {
+					window.location.href = "/login";
+					return;
+				}
+
+				const userData = JSON.parse(storedUserData);
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const roomcode = document.getElementById('roomcode').value.trim();
+        
+        try {
+          // Verificar sala
+          const response = await fetch(`${window.API_URL}/api/rooms/check`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              roomcode,
+              userId: userData.id
+            }),
+            credentials: 'include'
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            if (result.canJoin) {
+              // Redirigir a la sala
+              window.location.href = `/roomgame?roomcode=${roomcode}`;
+            } else {
+              showMessage(result.message || 'No se puede unir a la sala');
+            }
+          } else {
+            showMessage(result.message || 'Error al verificar la sala');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showMessage('Error de conexión con el servidor');
+        }
+      });
+
+      function showMessage(text) {
+        messageText.textContent = text;
+        messageContainer.style.display = 'block';
+        setTimeout(() => {
+          messageContainer.style.display = 'none';
+        }, 5000);
+      }
+    });
+  </script>
+</Layout>

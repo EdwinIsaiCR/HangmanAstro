@@ -1,0 +1,932 @@
+---
+// src/pages/playroom.astro
+import ArenaLayout from "../layouts/Layout.astro";
+import "../assets/css/arenagame.css";
+import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+
+// Obtener parámetro de la URL
+const roomcode = Astro.url.searchParams.get("roomcode");
+---
+
+<ArenaLayout title="Jugar en Sala">
+  <main>
+    <div
+      id="loading"
+      class="row justify-content-center align-items-center g-2"
+      style="height: 50vh;"
+    >
+      <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Modal de datos de sala -->
+    <div
+      class="modal fade"
+      id="modalNombre"
+      tabindex="-1"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      role="dialog"
+      aria-labelledby="modalTitleId"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm"
+        role="document"
+      >
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitleId">Datos Sala</h5>
+          </div>
+          <div class="modal-body">
+            <div class="form-floating mb-3">
+              <form id="roomDataForm">
+                <div class="vidas">
+                  <p id="roomname"></p>
+                  <p id="description"></p>
+                  <p id="vidas"></p>
+                  <p id="clueafter"></p>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">Cancelar</button
+              >
+              <button type="submit" id="btnJugar" class="btn btn-primary">¡Jugar!</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de resultados -->
+    <div
+      class="modal fade"
+      id="modalResult"
+      tabindex="-1"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      role="dialog"
+      aria-labelledby="modalTitleId"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm"
+        role="document"
+      >
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitleId2">Resultado</h5>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-primary">
+                <tbody id="resultTabla"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-dismiss="modal">Ok</button
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido principal del juego -->
+    <div class="container oculto" id="divPrincipal">
+      <div class="row align-items-center">
+        <div class="col">
+          Vidas: <span class="spanVidas"></span>
+        </div>
+        <div class="col">
+          Puntos: <span class="spanPuntos">0</span>
+        </div>
+        <div class="col">
+          <button
+            id="btnRendirse"
+            class="btn btn-primary"
+            aria-label="Rendirse"
+          >
+            Rendirse
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          Verbo: <span class="spanVerbo"></span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          <span class="spanPista oculto"></span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 justify-content-center" id="divHangman">
+          <img
+            id="img1"
+            src="./img/hangman/baseH.png"
+            width="220"
+            height="200"
+            loading="lazy"
+            alt="Base del ahorcado"
+          />
+          <img
+            id="img2"
+            src="./img/hangman/head.png"
+            width="220"
+            height="200"
+            class="oculto"
+            loading="lazy"
+            alt="Cabeza del ahorcado"
+          />
+          <img
+            id="img3"
+            src="./img/hangman/body.png"
+            width="220"
+            height="200"
+            class="oculto"
+            loading="lazy"
+            alt="Cuerpo del ahorcado"
+          />
+          <img
+            id="img4"
+            src="./img/hangman/ArmL.png"
+            width="220"
+            height="200"
+            class="oculto"
+            loading="lazy"
+            alt="Brazo izquierdo"
+          />
+          <img
+            id="img5"
+            src="./img/hangman/ArmR.png"
+            width="220"
+            height="200"
+            class="oculto"
+            loading="lazy"
+            alt="Brazo derecho"
+          />
+          <img
+            id="img6"
+            src="./img/hangman/LegL.png"
+            width="220"
+            height="200"
+            class="oculto"
+            loading="lazy"
+            alt="Pierna izquierda"
+          />
+          <img
+            id="img7"
+            src="./img/hangman/LegR.png"
+            width="220"
+            height="200"
+            class="oculto"
+            loading="lazy"
+            alt="Pierna derecha"
+          />
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="divBotones" class="col-12 text-center"></div>
+      </div>
+
+      <div class="row oculto">
+        <div id="divAdivinaPasadoTipo" class="col-12">
+          <form id="formulario">
+            <label class="form-label">Selecciona el tipo de verbo:</label>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="tipoV"
+                id="regular"
+                value="r"
+                checked
+              />
+              <label class="form-check-label" for="regular">Regular</label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="tipoV"
+                id="irregular"
+                value="i"
+              />
+              <label class="form-check-label" for="irregular">Irregular</label>
+            </div>
+            <div class="mb-2">
+              <input
+                required
+                type="text"
+                class="form-control"
+                name="txtPasado"
+                id="txtPasado"
+                autocomplete="off"
+                aria-describedby="helpId"
+                placeholder="Simple past"
+              />
+              <small id="helpId" class="form-text text-muted"></small>
+            </div>
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Accede a la variable inyectada por Astro
+    const apiUrl = import.meta.env.PUBLIC_API_URL;
+    window.API_URL = apiUrl;
+  </script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const HangmanGame = {
+        // Elementos DOM
+        dom: null,
+
+        // Estado del juego
+        state: {
+          verboJuega: null,
+          vidas: 0,
+          pistaDespuesDe: 0,
+          isfeedback: true,
+          randomWords: false,
+          systemWords: true,
+          verbos: [],
+          verbosfinish: 0,
+          idroom: 0,
+          idgameroom: 0,
+          wassguess: 0,
+          wastype: 0,
+          waspast: 0,
+          pointsAcum: 0,
+          perdioLasVidas: false,
+          seRindio: false,
+          errores: 0,
+          aciertos: 0,
+          intentos: 6,
+          verboDashes: [],
+          verboArray: [],
+          puntos: 0,
+          segundos: 0,
+          minutos: 0,
+          horas: 0,
+          intervalo: null,
+          userId: null,
+        },
+
+        // Modales
+        modals: {
+          nombre: null,
+          result: null,
+        },
+
+        // Inicialización
+        init: async function () {
+          try {
+            this.cacheDom();
+            this.setupEventListeners();
+
+            const storedUserData = sessionStorage.getItem("userData");
+            if (!storedUserData) {
+              window.location.href = "/login";
+              return;
+            }
+
+            const userData = JSON.parse(storedUserData);
+            console.log(userData);
+
+            this.state.userId = userData.id;
+
+            await this.loadRoomData();
+            this.setupModals();
+          } catch (error) {
+            console.error("Error en inicialización:", error);
+            alert("Error al iniciar el juego. Por favor recarga la página.");
+          }
+        },
+
+        cacheDom: function () {
+          this.dom = {
+            loading: document.getElementById("loading"),
+            roomDataForm: document.getElementById("roomDataForm"),
+            btnJugar: document.getElementById("btnJugar"),
+            spanVidas: document.querySelector(".spanVidas"),
+            spanPuntos: document.querySelector(".spanPuntos"),
+            spanVerbo: document.querySelector(".spanVerbo"),
+            spanPista: document.querySelector(".spanPista"),
+            divHangman: document.getElementById("divHangman"),
+            divBotones: document.getElementById("divBotones"),
+            divAdivinaPasadoTipo: document.getElementById(
+              "divAdivinaPasadoTipo",
+            ),
+            resultTabla: document.getElementById("resultTabla"),
+            pasadoUsr: document.getElementById("txtPasado"),
+            tipoUsr: document.getElementsByName("tipoV"),
+            btnRendirse: document.getElementById("btnRendirse"),
+            formulario: document.getElementById("formulario"),
+          };
+        },
+
+        setupModals: function () {
+          this.modals.nombre = new bootstrap.Modal(
+            document.getElementById("modalNombre"),
+          );
+          this.modals.result = new bootstrap.Modal(
+            document.getElementById("modalResult"),
+          );
+          this.modals.nombre.show();
+        },
+
+        setupEventListeners: function () {
+          this.dom.btnJugar?.addEventListener("click", (e) => {
+            e.preventDefault();
+            this.aJugar();
+          });
+
+          this.dom.btnRendirse?.addEventListener("click", () => {
+            this.rendir();
+          });
+
+          this.dom.formulario?.addEventListener("submit", (e) => {
+            e.preventDefault();
+            this.revisarPasado();
+          });
+
+          document
+            .querySelector("#modalResult .btn-primary")
+            ?.addEventListener("click", () => {
+              this.valida();
+            });
+        },
+
+        // Lógica del juego
+        randomKey: function (max) {
+          return Math.floor(Math.random() * max);
+        },
+
+        async loadRoomData() {
+          try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomcode = urlParams.get("roomcode");
+
+            const response = await fetch(
+              `${window.API_URL}/api/roomgame?roomcode=${roomcode}`,
+            );
+            if (!response.ok)
+              throw new Error("Error al cargar datos de la sala");
+
+            const datas = await response.json();
+            const data = datas.data;
+            console.log(data);
+
+            if (!data) throw new Error("Datos de sala no válidos");
+
+            this.state.idroom = data.id;
+            this.state.vidas = data.lives;
+            this.state.pistaDespuesDe = data.clueafter;
+            this.state.isfeedback = data.feedback.data[0] === 1;
+            this.state.randomWords = data.random.data[0] === 1;
+            this.state.systemWords = data.isgeneral.data[0] === 1;
+
+            // Actualizar modal con datos
+            document.getElementById("roomname").textContent =
+              `Nombre de la sala: ${data.roomname}`;
+            document.getElementById("description").textContent =
+              `Descripción: ${data.description}`;
+            document.getElementById("vidas").textContent =
+              `Vidas: ${data.lives === -1 ? "Ilimitadas" : data.lives}`;
+            document.getElementById("clueafter").textContent =
+              `Pistas después de: ${data.clueafter == -1 ? "Sin pistas" : data.clueafter + " intentos"}`;
+
+            await this.loadVerbs();
+          } catch (error) {
+            console.error("Error loading room data:", error);
+            throw error;
+          }
+        },
+
+        async loadVerbs() {
+          try {
+            const response = await fetch(
+              `${window.API_URL}/api/words/room`,
+              {
+                method: "POST", // Cambiado a POST para enviar en el body
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  roomid: this.state.idroom, // Envías el roomid en el body
+                }),
+              },
+            );
+            if (!response.ok) throw new Error("Error al cargar verbos");
+
+            const data = await response.json();
+            console.log(data);
+            if (!data) throw new Error("Formato de verbos no válido");
+            
+
+            this.state.verbos = data;
+          } catch (error) {
+            console.error("Error loading verbs:", error);
+            throw error;
+          }
+        },
+
+        seleccionaVerbo: function () {
+          console.log(this.state.verbos.length);
+          console.log(this.state.randomWords);
+          
+          if (this.state.verbos.length == 0) {
+            this.state.verbosfinish = 2;
+            this.terminar();
+            return null;
+          }
+
+          let verbo;
+          if (this.state.randomWords) {
+            const n = this.state.verbos.length;
+            const key = this.randomKey(n);
+            verbo = this.state.verbos[key];
+            this.state.verbos.splice(key, 1);
+          } else {
+            verbo = this.state.verbos[0];
+            this.state.verbos.splice(0, 1);
+          }
+
+          return verbo;
+        },
+
+        iniciar: function () {
+          try {
+            // Resetear interfaz
+            for (let i = 2; i <= 7; i++) {
+              document.getElementById(`img${i}`).style.visibility = "hidden";
+            }
+
+            this.dom.loading.classList.add("d-none");
+
+            // Seleccionar nuevo verbo
+            this.state.verboJuega = this.seleccionaVerbo();
+            if (!this.state.verboJuega) return;
+
+            // Resetear estado
+            this.state.errores = 0;
+            this.state.aciertos = 0;
+            this.state.intentos = 6;
+            this.state.verboArray = this.state.verboJuega.word.split("");
+            this.state.verboDashes = Array(this.state.verboArray.length).fill(
+              "_",
+            );
+
+            // Actualizar UI
+            this.dom.spanVidas.textContent =
+              this.state.vidas <= -1
+                ? "Ilimitadas"
+                : "♥".repeat(this.state.vidas);
+            this.dom.spanVerbo.textContent = this.state.verboDashes.join("   ");
+            this.dom.spanPista.classList.add("oculto");
+            this.dom.spanPista.textContent = this.state.verboJuega.clue;
+
+            this.crearBotones();
+            this.state.timeperword = "";
+            this.reiniciarContador();
+            this.iniciarContador();
+
+            this.dom.divBotones.classList.remove("d-none");
+            this.dom.divAdivinaPasadoTipo.classList.add("oculto");
+
+            document.getElementById("divPrincipal").classList.remove("oculto");
+          } catch (error) {
+            console.error("Error al iniciar juego:", error);
+            alert("Error al iniciar el juego. Intenta nuevamente.");
+          }
+        },
+
+        crearBotones: function () {
+          const alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          this.dom.divBotones.innerHTML = "";
+
+          alfabeto.split("").forEach((letra) => {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.id = letra;
+            boton.textContent = letra;
+            boton.className = "botonLetra btn btn-outline-primary m-1";
+            boton.setAttribute("aria-label", `Letra ${letra}`);
+
+            boton.addEventListener("click", () =>
+              this.procesarLetra(letra, boton),
+            );
+
+            this.dom.divBotones.appendChild(boton);
+          });
+        },
+
+        procesarLetra: function (letra, boton) {
+          try {
+            const sonido = new Audio("/songs/mech-keyboard.mp3");
+            sonido
+              .play()
+              .catch((e) => console.warn("Error al reproducir sonido:", e));
+
+            if (this.state.verboArray.includes(letra)) {
+              // Letra correcta
+              this.state.verboArray.forEach((car, ind) => {
+                if (car === letra) {
+                  this.state.verboDashes[ind] = car;
+                  this.state.aciertos++;
+                  this.state.puntos += 10;
+                  this.state.pointsAcum += 10;
+                }
+              });
+
+              this.dom.spanVerbo.textContent =
+                this.state.verboDashes.join("   ");
+              this.dom.spanPuntos.textContent = this.state.puntos;
+
+              if (this.state.aciertos === this.state.verboArray.length) {
+                const winSound = new Audio("/songs/adivinar.mp3");
+                winSound
+                  .play()
+                  .catch((e) => console.warn("Error al reproducir sonido:", e));
+                this.adivinarPasado();
+              }
+            } else {
+              // Letra incorrecta
+              this.state.intentos--;
+              this.state.errores++;
+              this.state.puntos = Math.max(0, this.state.puntos - 1);
+              this.dom.spanPuntos.textContent = this.state.puntos;
+
+              const imgId = 7 - this.state.intentos;
+              if (imgId >= 2 && imgId <= 7) {
+                document.getElementById(`img${imgId}`).style.visibility =
+                  "visible";
+              }
+
+              if (this.state.errores === this.state.pistaDespuesDe) {
+                this.dom.spanPista.classList.remove("oculto");
+              }
+
+              if (this.state.errores === 6) {
+                this.state.wassguess = 0;
+                this.state.wastype = 0;
+                this.state.waspast = 0;
+                this.detenerContador();
+                this.datailgameroom();
+                this.creaFeedback();
+                this.state.vidas--;
+                this.perdio();
+              }
+            }
+
+            boton.disabled = true;
+            boton.classList.remove("btn-outline-primary");
+            boton.classList.add("btn-secondary");
+          } catch (error) {
+            console.error("Error procesando letra:", error);
+          }
+        },
+
+        adivinarPasado: function () {
+          const verbo = this.state.verboJuega.word;
+          this.dom.divBotones.classList.add("d-none");
+          document.getElementById("helpId").textContent =
+            `Escribe el pasado simple del verbo ${verbo.toLowerCase()}`;
+          this.dom.divAdivinaPasadoTipo.classList.remove("d-none");
+          this.dom.divAdivinaPasadoTipo.classList.add("visible");
+        },
+
+        revisarPasado: function () {
+          try {
+            this.dom.divAdivinaPasadoTipo.classList.add("d-none");
+            const tipoOk = this.state.verboJuega.type.toLowerCase().trim();
+            const pasadoOk = this.state.verboJuega.simplepast
+              .toLowerCase()
+              .trim();
+            const pasadoTest = this.dom.pasadoUsr.value.toLowerCase().trim();
+
+            let tipoTest = "r";
+            for (const tipo of this.dom.tipoUsr) {
+              if (tipo.checked) {
+                tipoTest = tipo.value;
+                break;
+              }
+            }
+
+            this.state.wastype = tipoTest === tipoOk ? 1 : 0;
+            this.state.waspast = pasadoTest === pasadoOk ? 1 : 0;
+            this.state.wassguess = 1;
+
+            this.creaFeedback();
+
+            if (tipoTest === tipoOk && pasadoTest === pasadoOk) {
+              this.state.puntos += 15;
+              this.state.pointsAcum += 15;
+              this.gano();
+            } else {
+              this.state.vidas--;
+              this.state.puntos = Math.max(0, this.state.puntos - 10);
+              this.state.pointsAcum -= 10;
+              this.perdio();
+            }
+
+            this.detenerContador();
+            this.datailgameroom();
+            this.dom.formulario.reset();
+            this.dom.divAdivinaPasadoTipo.classList.add("oculto");
+          } catch (error) {
+            console.error("Error revisando pasado:", error);
+            alert("Error al verificar tu respuesta. Intenta nuevamente.");
+          }
+        },
+
+        gano: function () {
+          try {
+            const winSound = new Audio("/songs/win.mp3");
+            winSound
+              .play()
+              .catch((e) => console.warn("Error al reproducir sonido:", e));
+
+            document.getElementById("modalTitleId2").textContent =
+              "¡Correcto :) !";
+            this.modals.result.show();
+          } catch (error) {
+            console.error("Error en gano:", error);
+          }
+        },
+
+        perdio: function () {
+          try {
+            const loseSound = new Audio("/songs/lose.mp3");
+            loseSound
+              .play()
+              .catch((e) => console.warn("Error al reproducir sonido:", e));
+
+            document.getElementById("modalTitleId2").textContent =
+              "¡Incorrecto :( !";
+            this.modals.result.show();
+          } catch (error) {
+            console.error("Error en perdio:", error);
+          }
+        },
+
+        valida: function () {
+          if (this.state.vidas === 0) {
+            this.dom.spanVidas.textContent = "";
+            this.state.perdioLasVidas = true;
+            this.terminar();
+          } else {
+            this.iniciar();
+          }
+        },
+
+        creaFeedback: function () {
+          try {
+            
+            if (!this.state.isfeedback || !this.state.verboJuega) {
+              this.dom.resultTabla.innerHTML = "";
+              return;
+            }
+
+            const verbData = this.state.verboJuega;
+            const rows = [
+              { label: "Verbo:", value: verbData.word.toLowerCase() },
+              {
+                label: "Tipo:",
+                value:
+                  verbData.type.toLowerCase() === "r" ? "regular" : "irregular",
+              },
+              { label: "Pasado:", value: verbData.simplepast.toLowerCase() },
+              { label: "Ejemplo:", value: verbData.example },
+            ];
+
+            this.dom.resultTabla.innerHTML = rows
+              .map(
+                (row) => `
+              <tr>
+                <td>${row.label}</td>
+                <td>${row.value}</td>
+              </tr>
+            `,
+              )
+              .join("");
+          } catch (error) {
+            console.error("Error creando feedback:", error);
+          }
+        },
+
+        // Temporizador
+        actualizarContador: function () {
+          this.state.segundos++;
+
+          if (this.state.segundos === 60) {
+            this.state.segundos = 0;
+            this.state.minutos++;
+
+            if (this.state.minutos === 60) {
+              this.state.minutos = 0;
+              this.state.horas++;
+            }
+          }
+
+          this.state.timeperword =
+            `${this.state.horas < 10 ? "0" : ""}${this.state.horas}:` +
+            `${this.state.minutos < 10 ? "0" : ""}${this.state.minutos}:` +
+            `${this.state.segundos < 10 ? "0" : ""}${this.state.segundos}`;
+        },
+
+        detenerContador: function () {
+          if (this.state.intervalo) {
+            clearInterval(this.state.intervalo);
+            this.state.intervalo = null;
+          }
+        },
+
+        iniciarContador: function () {
+          this.detenerContador();
+          this.state.intervalo = setInterval(
+            () => this.actualizarContador(),
+            1000,
+          );
+        },
+
+        reiniciarContador: function () {
+          this.detenerContador();
+          this.state.segundos = 0;
+          this.state.minutos = 0;
+          this.state.horas = 0;
+        },
+
+        // API Calls
+        async datailgameroom() {
+          
+          try {
+            const response = await fetch(
+              `${window.API_URL}/api/roomgame/detail`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  gameroomid: this.state.idgameroom,
+                  wordid: this.state.verboJuega.id,
+                  roomid: this.state.idroom,
+                  verbAdivinado: this.state.wassguess,
+                  tipo: this.state.wastype,
+                  pasado: this.state.waspast,
+                  timeperword: this.state.timeperword,
+                  puntos: this.state.pointsAcum,
+                }),
+              },
+            );
+
+            if (!response.ok) throw new Error("Error al guardar detalle");
+
+            this.state.pointsAcum = 0;
+          } catch (error) {
+            console.error("Error en datailgameroom:", error);
+          }
+        },
+
+        async insertarJuego() {
+          try {
+            const response = await fetch(
+              `${window.API_URL}/api/roomgame/new`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userid: this.state.userId,
+                  roomid: this.state.idroom,
+                }),
+              },
+            );
+
+            if (!response.ok) throw new Error("Error al crear juego");
+
+            const data = await response.json();
+            this.state.idgameroom = data.data[0].id;
+            console.log(this.state.idgameroom);
+            
+          } catch (error) {
+            console.error("Error en insertarJuego:", error);
+            throw error;
+          }
+        },
+
+        async terminar() {
+  try {
+    // Ocultar elementos del juego de manera segura
+    const elementsToHide = [
+      'loading', 'vidas', 'rendirse', 'verbo', 
+      'pista', 'divHangman', 'puntos'
+    ];
+
+    elementsToHide.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.style.display = id === 'loading' ? 'block' : 'none';
+      }
+    });
+
+    const rindioSend = this.state.seRindio ? 1 : 0;
+    const puntosSend = this.state.vidas <= -1 ? this.state.puntos : 
+                      this.state.seRindio ? 0 : this.state.puntos;
+    const statusSend = this.state.vidas <= -1 ? -1 : 
+                      this.state.seRindio ? 1 : 
+                      this.state.verbosfinish ? 2 : 0;
+
+    const response = await fetch(`${window.API_URL}/api/roomgame/finish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userid: this.state.userId,
+        idgr: this.state.idgameroom,
+        puntos: puntosSend,
+        rindio: rindioSend,
+        status: statusSend,
+      }),
+    });
+
+    if (!response.ok) throw new Error("Error al finalizar juego");
+
+    window.location.href = `/tableroom?r=${this.state.idroom}`;
+  } catch (error) {
+    console.error("Error en terminar:", error);
+    alert("Error al finalizar el juego. Intenta nuevamente.");
+    // Redirigir a dashboard como fallback
+    window.location.href = '/dashboard';
+  }
+},
+        aJugar: async function () {
+          try {
+            this.modals.nombre.hide();
+            await this.insertarJuego();
+            this.iniciar();
+          } catch (error) {
+            console.error("Error en aJugar:", error);
+            alert("Error al iniciar el juego. Intenta nuevamente.");
+          }
+        },
+
+        rendir: function () {
+          this.state.seRindio = confirm("¿De verdad deseas rendirte?");
+          if (this.state.seRindio) {
+            try {
+              const sonido = new Audio("/songs/lose.mp3");
+              sonido
+                .play()
+                .catch((e) => console.warn("Error al reproducir sonido:", e));
+              this.terminar();
+            } catch (error) {
+              console.error("Error en rendir:", error);
+            }
+          }
+        },
+      };
+
+      // Inicializar el juego cuando el DOM esté listo
+      document.addEventListener("DOMContentLoaded", () => {
+        try {
+          // Limpiar spinners si existen
+          const spinners = document.querySelectorAll(
+            '.spinner-border, [role="status"]',
+          );
+          spinners.forEach((spinner) =>
+            spinner?.parentNode?.removeChild(spinner),
+          );
+
+          HangmanGame.init();
+          window.hangmanApp = HangmanGame; // Solo para depuración
+        } catch (error) {
+          console.error("Error en inicialización global:", error);
+          alert(
+            "Error crítico al cargar el juego. Por favor recarga la página.",
+          );
+        }
+      });
+    })();
+  </script>
+</ArenaLayout>

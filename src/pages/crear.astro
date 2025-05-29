@@ -1,0 +1,541 @@
+---
+// crear.astro
+import Layout from "../layouts/Layout.astro";
+import "../assets/css/editar.css";
+import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+
+
+// Obtener parámetros de la URL
+const { url } = Astro;
+const select = url.searchParams.get("select");
+
+---
+
+<Layout title="Crear">
+    <a href="./dashboard">
+        <button type="button" class="btn btn-danger regresar">Regresar</button>
+    </a>
+
+    <!-- Contenido para crear sala -->
+    {select === "sala" && (
+        <div class="salas">
+            <div id="sala_crear" class="content">
+                <div class="form-container">
+                    <h1>Crear Sala de Juego</h1>
+                    <form id="salaForm">
+                        <label class="form-label" for="roomName">Nombre de la sala:</label>
+                        <input class="form-input" type="text" id="roomName" name="roomName" maxlength="50" required />
+
+                        <label class="form-label" for="roomDescription">Descripción de la sala:</label>
+                        <textarea class="form-input form-textarea" id="roomDescription" name="roomDescription"
+                            maxlength="300" required></textarea>
+
+                        <label class="form-label" for="unlimitedLives">¿Vidas ilimitadas?</label>
+                        <input class="checkbox-input" type="checkbox" id="unlimitedLives" name="unlimitedLives"
+                            checked />
+
+                        <label class="form-label" for="numLives">Número de vidas:</label>
+                        <input class="form-input" type="number" id="numLives" name="numLives" min="1" max="10" value="3"
+                            disabled />
+
+                        <label class="form-label" for="showHints">¿Mostrar pistas?</label>
+                        <input class="checkbox-input" type="checkbox" id="showHints" name="showHints"
+                            checked />
+
+                        <label class="form-label" for="errorNumber">Mostrar pistas después del error número:</label>
+                        <input class="form-input" type="number" id="errorNumber" name="errorNumber" min="1" max="5"
+                            value="3" />
+
+                        <label class="form-label" for="showFeedback">¿Mostrar retroalimentación?</label>
+                        <input class="checkbox-input" type="checkbox" id="showFeedback" name="showFeedback" checked />
+
+                        <label class="form-label" for="randomOrder">¿Orden de palabras aleatorio?</label>
+                        <input class="checkbox-input" type="checkbox" id="randomOrder" name="randomOrder" />
+
+                        <label class="form-label" for="isOpen">Estado de entrada:</label>
+                        <select class="select-input" id="isOpen" name="isOpen">
+                            <option value="isOpen">Abierta</option>
+                            <option value="isClose">Cerrada</option>
+                        </select>
+
+                        <label class="form-label" for="statusSource">Establecer horario:</label>
+                        <select class="select-input" id="statusSource" name="statusSource">
+                            <option value="0">Sin horario</option>
+                            <option value="1">Solo entrada</option>
+                            <option value="2">Solo cierre</option>
+                            <option value="3">Entrada y cierre</option>
+                        </select>
+
+                        <div class="settimeopen" id="settimeopen">
+                            <label class="form-label" for="timestampOpen">Hora de apertura:</label>
+                            <input class="form-input" type="datetime-local" id="timestampOpen" name="timestampOpen" />
+                        </div>
+                        <div class="settimeclose" id="settimeclose">
+                            <label class="form-label" for="timestampClose">Hora de cierre:</label>
+                            <input class="form-input" type="datetime-local" id="timestampClose" name="timestampClose" />
+                        </div>
+
+                        <label class="form-label" for="wordSource">Palabras de la sala:</label>
+                        <select class="select-input" id="wordSource" name="wordSource">
+                            <option value="0">Palabras del sistema</option>
+                            <option value="1">Palabras del usuarios</option>
+                        </select>
+
+                        <div class="word-list" id="wordList">
+                            <label class="form-label" for="wordListSelect">Seleccione la lista de palabras:</label>
+                            <select class="select-input" id="wordListSelect" name="wordListSelect">
+                                <option value="0">Selecciona una lista</option>
+                                <!-- Las listas se cargarán dinámicamente con JavaScript -->
+                            </select>
+                        </div>
+                        <button type="submit" class="form-button">Crear sala</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    )}
+
+    <!-- Contenido para crear lista -->
+    {select === "lista" && (
+        <div class="listas">
+            <div id="listas_crear" class="content">
+                <div class="form-container">
+                    <h1>Crear Lista</h1>
+                    <form id="listaForm">
+                        <label class="form-label" for="listName">Nombre de la Lista:</label>
+                        <input class="form-input" type="text" id="listName" name="listName" maxlength="50" required />
+                        <label class="form-label" for="descripcion">Descipcion de la lista</label>
+                        <textarea class="form-input form-textarea" id="descripcion" name="descripcion" maxlength="300" required></textarea>
+                        <button type="submit" class="form-button">Crear lista</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    )}
+
+    <!-- Contenido para crear palabra -->
+    {select === "palabra" && (
+        <div class="palabras">
+            <div id="palabras_crear" class="content">
+                <div class="form-container">
+                    <h1>Crear Palabras</h1>
+                    <form id="palabraForm">
+                        <label class="form-label" for="wordName">Palabra:</label>
+                        <input class="form-input" type="text" id="wordName" name="wordName" maxlength="50" required />
+
+                        <label class="form-label" for="wordSpanish">Significado en español de la palabra:</label>
+                        <input class="form-input" type="text" id="wordSpanish" name="wordSpanish" maxlength="50" required />
+
+                        <label class="form-label" for="typeListSelect">Seleccione el tipo de verbo:</label>
+                        <select class="select-input" id="typeListSelect" name="typeListSelect">
+                            <option value="R">Regular</option>
+                            <option value="I">Irregular</option>
+                        </select>
+
+                        <label class="form-label" for="clue">Pista de la palabra:</label>
+                        <textarea class="form-input form-textarea" id="clue" name="clue" maxlength="300" required></textarea>
+
+                        <label class="form-label" for="wordPast">Pasado simple de la palabra:</label>
+                        <input class="form-input" type="text" id="wordPast" name="wordPast" maxlength="50" required />
+
+                        <label class="form-label" for="eg">Ejemplo de la palabra:</label>
+                        <textarea class="form-input form-textarea" id="eg" name="eg" maxlength="300" required></textarea>
+
+                        <input type="submit" class="form-button" name="submit_crear_palabra" value="Crear palabra" required />
+                    </form>
+                </div>
+            </div>
+        </div>
+    )}
+
+<script>
+    // Accede a la variable inyectada por Astro
+    const apiUrl = import.meta.env.PUBLIC_API_URL;
+    window.API_URL = apiUrl;
+</script>
+
+<script>
+    // Cargar datos iniciales y configurar formularios
+    let userId;
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Configurar eventos para los toggle
+        setupFormToggles();
+
+        const storedUserData = sessionStorage.getItem("userData");
+        if (storedUserData) {
+            const userData = JSON.parse(storedUserData);
+            userId = userData.id;
+        }
+        
+        // Cargar listas del usuario si es necesario
+        if (document.getElementById('wordListSelect')) {
+            await loadUserLists();
+        }
+        
+        // Configurar manejadores de formularios
+        setupFormHandlers();
+    });
+
+    // Función para cargar las listas del usuario
+    async function loadUserLists() {
+    try {
+        const response = await fetch(`${window.API_URL}/api/lists?userId=${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (response.ok) {
+            const lists = await response.json();
+            console.log("Listas recibidas:", lists.data); // Para depuración
+            
+            const select = document.getElementById('wordListSelect');
+            
+            // Limpiar opciones existentes (excepto la primera)
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // Verificar si hay listas y mostrarlas
+            if (lists.data && lists.data.length > 0) {
+                // Agregar nuevas opciones
+                lists.data.forEach(list => {
+                    const option = document.createElement('option');
+                    option.value = list.id;
+                    option.textContent = list.listname;
+                    select.appendChild(option);
+                });
+            } else {
+                console.log("No hay listas disponibles");
+                // Opcional: agregar una opción indicando que no hay listas
+                const option = document.createElement('option');
+                option.value = "0";
+                option.textContent = "No tienes listas creadas";
+                option.disabled = true;
+                option.selected = true;
+                select.appendChild(option);
+            }
+        } else {
+            console.error("Error en la respuesta:", response.status);
+            alert("Error al cargar las listas");
+        }
+    } catch (error) {
+        console.error("Error cargando listas:", error);
+        alert("Error de conexión al cargar las listas");
+    }
+}
+
+    // Configurar los toggle de los formularios
+    function setupFormToggles() {
+        // Toggle de vidas ilimitadas
+        const unlimitedLives = document.getElementById("unlimitedLives");
+        const numLives = document.getElementById("numLives");
+        if (unlimitedLives && numLives) {
+            unlimitedLives.addEventListener('change', () => {
+                numLives.disabled = unlimitedLives.checked;
+            });
+            numLives.disabled = unlimitedLives.checked;
+        }
+
+        // Toggle de pistas
+        const showHints = document.getElementById("showHints");
+        const errorNumber = document.getElementById("errorNumber");
+        if (showHints && errorNumber) {
+            showHints.addEventListener('change', () => {
+                errorNumber.disabled = !showHints.checked;
+            });
+            errorNumber.disabled = !showHints.checked;
+        }
+
+        // Toggle de horario de sala
+        const statusSource = document.getElementById("statusSource");
+        const settimeopen = document.getElementById("settimeopen");
+        const settimeclose = document.getElementById("settimeclose");
+        
+        if (statusSource && settimeopen && settimeclose) {
+            statusSource.addEventListener('change', updateRoomStatusVisibility);
+            updateRoomStatusVisibility();
+            
+            function updateRoomStatusVisibility() {
+                const value = statusSource.value;
+                settimeopen.style.display = (value === "1" || value === "3") ? "block" : "none";
+                settimeclose.style.display = (value === "2" || value === "3") ? "block" : "none";
+            }
+        }
+
+        // Toggle de fuente de palabras
+        const wordSource = document.getElementById("wordSource");
+        const wordList = document.getElementById("wordList");
+        if (wordSource && wordList) {
+            wordSource.addEventListener('change', () => {
+                wordList.style.display = wordSource.value === "1" ? "block" : "none";
+            });
+            wordList.style.display = wordSource.value === "1" ? "block" : "none";
+        }
+    }
+
+    // Configurar los manejadores de envío de formularios
+    function setupFormHandlers() {
+        // Formulario de Sala
+        const salaForm = document.getElementById('salaForm');
+        if (salaForm) {
+            salaForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(salaForm);
+
+    const { roomcode, qrcode } = await generateUniqueRoomCode();
+    console.log('Código de sala generado:', roomcode);
+    console.log('QR Code URL:', qrcode);
+    
+    // Obtener y formatear las fechas correctamente
+    const timestampOpen = formData.get('timestampOpen');
+    const timestampClose = formData.get('timestampClose');
+    
+    const roomData = {
+        userId,
+        roomName: formData.get('roomName'),
+        roomDescription: formData.get('roomDescription'),
+        lives: formData.get('unlimitedLives') === 'on' ? -1 : parseInt(formData.get('numLives')),
+        clue: formData.get('showHints') === 'on' ? 1 : 0,
+        clueafter: formData.get('showHints') === 'on' ? parseInt(formData.get('errorNumber')) : -1,
+        feedback: formData.get('showFeedback') === 'on' ? 1 : 0,
+        random: formData.get('randomOrder') === 'on' ? 1 : 0,
+        isOpen: formData.get('isOpen') === 'isOpen' ? 1 : 0,
+        isgeneral: formData.get('wordSource') === '0' ? 1 : 0,
+        lists_id: formData.get('wordSource') === '1' ? parseInt(formData.get('wordListSelect')) : 0,
+        hasstartdatetime: ['1', '3'].includes(formData.get('statusSource')) ? 1 : 0,
+        startdatetime: timestampOpen || null,
+        hasenddatetime: ['2', '3'].includes(formData.get('statusSource')) ? 1 : 0,
+        enddatetime: timestampClose || null,
+        roomcode,
+        qrcode
+    };
+
+    console.log('Datos a enviar:', roomData);
+
+    try {
+            // 1. Crear la sala
+            const createResponse = await fetch(`${window.API_URL}/api/rooms`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(roomData)
+            });
+
+            if (!createResponse.ok) {
+                const error = await createResponse.json();
+                throw new Error(error.message || 'Error al crear la sala');
+            }
+
+            const createResult = await createResponse.json();
+            console.log('Sala creada:', createResult);
+            const nuevaID = createResult.roomId; // Asegúrate que tu API devuelva el ID de la sala creada
+
+            // 2. Agregar palabras a la sala según la fuente seleccionada
+            if (roomData.isgeneral === 1) {
+                // Obtener palabras del sistema (user_id = 1)
+                const wordsResponse = await fetch(`${window.API_URL}/api/words/ids?userId=1`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!wordsResponse.ok) {
+                    throw new Error('Error al obtener palabras del sistema');
+                }
+
+                const systemWords = await wordsResponse.json();
+                const wordsOfSystem = systemWords.map(word => word.id);
+
+                // Insertar palabras en la sala
+                await addWordsToRoom(nuevaID, wordsOfSystem);
+            } else {
+                // Obtener palabras de la lista seleccionada
+                const listId = roomData.lists_id;
+                const listWordsResponse = await fetch(`${window.API_URL}/api/lists/words/ids?listId=${listId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!listWordsResponse.ok) {
+                    throw new Error('Error al obtener palabras de la lista');
+                }
+
+                const listWords = await listWordsResponse.json();
+                const wordsOfList = listWords.map(word => word.word_id);
+
+                // Insertar palabras en la sala
+                await addWordsToRoom(nuevaID, wordsOfList);
+            }
+
+            alert('Sala creada correctamente con sus palabras');
+            window.location.href = './dashboard';
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error: ${error.message || 'Error al crear la sala'}`);
+        }
+});
+        }
+
+        async function addWordsToRoom(roomId, wordIds) {
+  try {
+    console.log('Enviando palabras al servidor:', { roomId, wordIds }); // Log frontend
+
+    const response = await fetch(`${window.API_URL}/api/rooms/words`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
+        roomId,
+        wordIds: Array.isArray(wordIds) ? wordIds : [wordIds] // Asegurar que sea array
+      })
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error('Error del servidor:', result); // Log del error del servidor
+      throw new Error(result.message || `Error ${response.status}: ${response.statusText}`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error en addWordsToRoom:', { 
+      error: error.message,
+      roomId,
+      wordIds 
+    });
+    throw error;
+  }
+}
+
+        // Formulario de Lista
+        const listaForm = document.getElementById('listaForm');
+        if (listaForm) {
+            listaForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(listaForm);
+                const listData = {
+                    listName: formData.get('listName'),
+                    description: formData.get('descripcion'),
+                    userId
+                };
+
+                console.log('Datos a enviar:', listData);
+                
+                try {
+                    const response = await fetch(`${window.API_URL}/api/lists`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(listData)
+                    });
+
+                    if (response.ok) {
+                        alert('Lista creada correctamente');
+                        window.location.href = './dashboard';
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.message || 'Error al crear la lista'}`);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error de conexión al crear la lista');
+                }
+            });
+        }
+
+        // Formulario de Palabra
+        const palabraForm = document.getElementById('palabraForm');
+        if (palabraForm) {
+            palabraForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(palabraForm);
+                const wordData = {
+                    userId,
+                    word: formData.get('wordName').toUpperCase(),
+                    spanish: formData.get('wordSpanish').toUpperCase(),
+                    type: formData.get('typeListSelect').toUpperCase(),
+                    clue: formData.get('clue').toUpperCase(),
+                    simplepast: formData.get('wordPast').toUpperCase(),
+                    example: formData.get('eg').toUpperCase()
+                };
+
+                console.log('Datos a enviar:', wordData);
+
+                try {
+                    const response = await fetch(`${window.API_URL}/api/words`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(wordData)
+                    });
+
+                    if (response.ok) {
+                        alert('Palabra creada correctamente');
+                        window.location.href = './dashboard';
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.message || 'Error al crear la palabra'}`);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error de conexión al crear la palabra');
+                }
+            });
+        }
+    }
+
+    async function isRoomCodeUnique(code) {
+  try {
+    const response = await fetch(`${window.API_URL}/api/rooms/checkCode?code=${encodeURIComponent(code)}`);
+    if (!response.ok) throw new Error('Error en la respuesta del servidor');
+    
+    const data = await response.json();
+    return data.success && !data.exists;
+    
+  } catch (error) {
+    console.error('Error verificando código:', error);
+    return false; // En caso de error, asumimos que no es único
+  }
+}
+
+async function generateUniqueRoomCode() {
+  let roomcode;
+  let isUnique = false;
+  
+  while (!isUnique) {
+    roomcode = generateRoomCode();
+    isUnique = await isRoomCodeUnique(roomcode);
+  }
+  
+  const qrcode = `${window.API_URL}/roomgame?roomcode=${roomcode}`;
+  return { roomcode, qrcode };
+}
+
+// Función para generar un código aleatorio de 6 caracteres
+function generateRoomCode() {
+  let roomcode = '';
+  const caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  
+  for (let i = 0; i < 6; i++) {
+    roomcode += caracteres[Math.floor(Math.random() * caracteres.length)];
+  }
+  
+  return roomcode;
+}
+</script>
+</Layout>

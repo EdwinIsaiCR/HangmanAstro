@@ -1,0 +1,164 @@
+---
+// src/pages/cerrarsesion.astro
+import Layout from '../layouts/Layout.astro';
+import '../assets/css/styledash.css';
+
+// NO hacer el logout aquí - se ejecuta en el servidor
+// El logout se hará en el cliente con JavaScript
+---
+
+<Layout title="Cerrando sesión...">
+  <div class="logout-container">
+    <!-- Estado inicial -->
+    <div id="loading-state">
+      <h2>Cerrando sesión...</h2>
+      <p>Por favor espera</p>
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Estado de éxito (oculto inicialmente) -->
+    <div id="success-state" style="display: none;">
+      <h2>Sesión cerrada correctamente</h2>
+      <p>Redirigiendo al login...</p>
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Estado de error (oculto inicialmente) -->
+    <div id="error-state" style="display: none;">
+      <h2>Error al cerrar sesión</h2>
+      <p id="error-message">Ocurrió un error</p>
+      <a href="/dashboard" class="btn">Volver al dashboard</a>
+      <a href="/login" class="btn">Ir al login</a>
+    </div>
+  </div>
+
+  <script>
+    // Accede a la variable inyectada por Astro
+    const apiUrl = import.meta.env.PUBLIC_API_URL;
+    window.API_URL = apiUrl;
+  </script>
+
+  <!-- Script que se ejecuta en el CLIENTE -->
+  <script is:inline>
+    console.log('🔄 Iniciando logout desde el cliente...');
+    
+    async function performLogout() {
+      try {
+        console.log('📡 Enviando request de logout...');
+        
+        const response = await fetch(`${window.API_URL}/api/auth/logout`, {
+          method: 'POST',
+          credentials: 'include', // ← CRUCIAL - envía cookies del navegador
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        console.log('📥 Response status:', response.status);
+        const data = await response.json();
+        console.log('📥 Response data:', data);
+        
+        if (data.success) {
+          console.log('✅ Logout exitoso');
+          
+          // Mostrar estado de éxito
+          document.getElementById('loading-state').style.display = 'none';
+          document.getElementById('success-state').style.display = 'block';
+          
+          // Limpiar datos del cliente
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.removeItem('userData');
+            sessionStorage.clear();
+          }
+          if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('rememberMe');
+            localStorage.clear();
+          }
+          
+          // Redirigir después de 2 segundos
+          setTimeout(() => {
+            console.log('🔄 Redirigiendo al login...');
+            window.location.href = '/login';
+          }, 2000);
+          
+        } else {
+          console.log('❌ Logout falló:', data.message);
+          showError(data.message || 'Error al cerrar sesión');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error en logout:', error);
+        showError('Error de conexión con el servidor');
+      }
+    }
+    
+    function showError(message) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+      document.getElementById('error-message').textContent = message;
+      
+      // Opcional: redirigir al login después de unos segundos incluso con error
+      setTimeout(() => {
+        console.log('🔄 Redirigiendo al login por timeout...');
+        // Limpiar storage por si acaso
+        if (typeof sessionStorage !== 'undefined') sessionStorage.clear();
+        if (typeof localStorage !== 'undefined') localStorage.clear();
+        window.location.href = '/login';
+      }, 5000);
+    }
+    
+    // Ejecutar logout cuando la página cargue
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 DOM cargado, ejecutando logout...');
+      performLogout();
+    });
+    
+    // Fallback: ejecutar inmediatamente si DOMContentLoaded ya pasó
+    if (document.readyState === 'loading') {
+      // DOM aún cargando, el event listener funcionará
+    } else {
+      // DOM ya cargado, ejecutar inmediatamente
+      console.log('🚀 DOM ya cargado, ejecutando logout inmediatamente...');
+      performLogout();
+    }
+  </script>
+
+  <style>
+    .logout-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      margin: 20px auto;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .btn {
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    
+    .btn:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</Layout>

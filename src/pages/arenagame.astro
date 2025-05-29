@@ -328,7 +328,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 
         async leerVerbos() {
           try {
-            const data = await fetch(`${window.API_URL}/api/words`);
+            const data = await fetch(`${window.API_URL}/api/words?userId=1`);
             const verbos = await data.json();
             this.verbos = verbos.data;
             console.log("verbos", this.verbos);
@@ -341,7 +341,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         seleccionaVerbo() {
           const n = this.verbos.length;
 
-          if (n === 0) {
+          if (n == 0) {
             this.terminar(); // Llama a terminar si ya no quedan verbos
             return null;
           }
@@ -349,10 +349,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           const key = this.randomKey(n);
           const verbo = this.verbos[key];
           this.verbos.splice(key, 1);
-
-          if (this.verbos.length === 0) {
-            setTimeout(() => this.terminar(), 500);
-          }
 
           return verbo;
         },

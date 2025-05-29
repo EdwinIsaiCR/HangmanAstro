@@ -1,0 +1,766 @@
+---
+// editar.astro
+import Layout from "../layouts/Layout.astro";
+import "../assets/css/editar.css";
+import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+
+// Get URL parameters
+const { url } = Astro;
+const id = url.searchParams.get("id");
+const select = url.searchParams.get("select");
+
+// Redirect if no valid selection
+if (!select || !["sala", "lista", "palabra"].includes(select)) {
+    return Astro.redirect("/404");
+}
+---
+
+<Layout title="Editar">
+    <a href="/dashboard">
+        <button type="button" class="btn btn-danger regresar">Regresar</button>
+    </a>
+
+    {
+        select === "sala" && (
+            <div class="salas">
+                <div id="sala_editar" class="content">
+                    <h2>Contenido para editar salas</h2>
+
+                    <form id="salaForm">
+                        <label class="form-label" for="roomName">
+                            Nombre de la sala:
+                        </label>
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="roomName"
+                            name="roomName"
+                            maxlength="50"
+                            required
+                        />
+
+                        <label class="form-label" for="roomDescription">
+                            Descripción de la sala:
+                        </label>
+                        <textarea
+                            class="form-input form-textarea"
+                            id="roomDescription"
+                            name="roomDescription"
+                            maxlength="300"
+                            required
+                        />
+
+                        <label class="form-label" for="unlimitedLives">
+                            ¿Vidas ilimitadas?
+                        </label>
+                        <input
+                            class="checkbox-input"
+                            type="checkbox"
+                            id="unlimitedLives"
+                            name="unlimitedLives"
+                        />
+
+                        <label class="form-label" for="numLives">
+                            Número de vidas:
+                        </label>
+                        <input
+                            class="form-input"
+                            type="number"
+                            id="numLives"
+                            name="numLives"
+                            min="1"
+                            max="10"
+                        />
+
+                        <label class="form-label" for="showHints">
+                            ¿Mostrar pistas?
+                        </label>
+                        <input
+                            class="checkbox-input"
+                            type="checkbox"
+                            id="showHints"
+                            name="showHints"
+                        />
+
+                        <label class="form-label" for="errorNumber">
+                            Mostrar pistas después del error número:
+                        </label>
+                        <input
+                            class="form-input"
+                            type="number"
+                            id="errorNumber"
+                            name="errorNumber"
+                            min="1"
+                            max="5"
+                        />
+
+                        <label class="form-label" for="showFeedback">
+                            ¿Mostrar retroalimentación?
+                        </label>
+                        <input
+                            class="checkbox-input"
+                            type="checkbox"
+                            id="showFeedback"
+                            name="showFeedback"
+                        />
+
+                        <label class="form-label" for="randomOrder">
+                            ¿Orden de palabras aleatorio?
+                        </label>
+                        <input
+                            class="checkbox-input"
+                            type="checkbox"
+                            id="randomOrder"
+                            name="randomOrder"
+                        />
+
+                        <label class="form-label" for="isOpen">
+                            Estado de entrada:
+                        </label>
+                        <select class="select-input" id="isOpen" name="isOpen">
+                            <option value="isOpen">Abierta</option>
+                            <option value="isClose">Cerrada</option>
+                        </select>
+
+                        <label class="form-label" for="wordSource">
+                            Palabras de la sala:
+                        </label>
+                        <select
+                            class="select-input"
+                            id="wordSource"
+                            name="wordSource"
+                        >
+                            <option value="0">Palabras del sistema</option>
+                            <option value="1">Palabras del usuario</option>
+                        </select>
+
+                        <div
+                            class="word-list"
+                            id="wordList"
+                            style="display: none"
+                        >
+                            <label class="form-label" for="wordListSelect">
+                                Seleccione la lista de palabras:
+                            </label>
+                            <select
+                                class="select-input"
+                                id="wordListSelect"
+                                name="wordListSelect"
+                            >
+                                <option value="0">Selecciona una lista</option>
+                            </select>
+                        </div>
+
+                        <input type="hidden" id="roomId" name="id" value={id} />
+                        <button type="submit" class="form-button">
+                            Editar Sala
+                        </button>
+                    </form>
+                </div>
+            </div>
+        )
+    }
+
+    {
+        select === "lista" && (
+            <div class="listas">
+                <div id="listas_crear" class="content">
+                    <div class="form-container">
+                        <h1>Editar Lista</h1>
+
+                        <form id="listaForm">
+                            <label class="form-label" for="listName">
+                                Nombre de la Lista:
+                            </label>
+                            <input
+                                class="form-input"
+                                type="text"
+                                id="listName"
+                                name="listName"
+                                maxlength="50"
+                                required
+                            />
+
+                            <label class="form-label" for="descripcion">
+                                Descripción de la lista:
+                            </label>
+                            <textarea
+                                class="form-input form-textarea"
+                                id="descripcion"
+                                name="descripcion"
+                                maxlength="300"
+                                required
+                            />
+
+                            <input
+                                type="hidden"
+                                id="listId"
+                                name="id"
+                                value={id}
+                            />
+                            <button type="submit" class="form-button">
+                                Editar Lista
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    {
+        select === "palabra" && (
+            <div class="palabras">
+                <div id="sala_palabras" class="content">
+                    <h2>Contenido para editar palabras</h2>
+
+                    <form id="palabraForm">
+                        <label class="form-label" for="wordName">
+                            Palabra:
+                        </label>
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="wordName"
+                            name="wordName"
+                            maxlength="50"
+                            required
+                        />
+
+                        <label class="form-label" for="wordSpanish">
+                            Significado en español de la palabra:
+                        </label>
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="wordSpanish"
+                            name="wordSpanish"
+                            maxlength="50"
+                            required
+                        />
+
+                        <label class="form-label" for="typeListSelect">
+                            Seleccione el tipo de verbo:
+                        </label>
+                        <select
+                            class="select-input"
+                            id="typeListSelect"
+                            name="typeListSelect"
+                        >
+                            <option value="R">Regular</option>
+                            <option value="I">Irregular</option>
+                        </select>
+
+                        <label class="form-label" for="clue">
+                            Pista de la palabra:
+                        </label>
+                        <textarea
+                            class="form-input form-textarea"
+                            id="clue"
+                            name="clue"
+                            maxlength="300"
+                            required
+                        />
+
+                        <label class="form-label" for="wordPast">
+                            Pasado simple de la palabra:
+                        </label>
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="wordPast"
+                            name="wordPast"
+                            maxlength="50"
+                            required
+                        />
+
+                        <label class="form-label" for="eg">
+                            Ejemplo de la palabra:
+                        </label>
+                        <textarea
+                            class="form-input form-textarea"
+                            id="eg"
+                            name="eg"
+                            maxlength="300"
+                            required
+                        />
+
+                        <input type="hidden" id="wordId" name="id" value={id} />
+                        <button type="submit" class="form-button">
+                            Editar Palabra
+                        </button>
+                    </form>
+                </div>
+            </div>
+        )
+    }
+
+<script>
+    // Accede a la variable inyectada por Astro
+    const apiUrl = import.meta.env.PUBLIC_API_URL;
+    window.API_URL = apiUrl;
+  </script>
+
+    <script>
+        // Initialize form state
+        document.addEventListener("DOMContentLoaded", async function () {
+            const checkbox = document.getElementById("unlimitedLives");
+            const numLivesInput = document.getElementById("numLives");
+            const showHintsCheckbox = document.getElementById("showHints");
+            const cluesInputs = document.getElementById("errorNumber");
+
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get("id");
+            const select = urlParams.get("select");
+
+            try {
+                let apiUrl,
+                    formId = "";
+
+                // Configurar según el tipo
+                switch (select) {
+                    case "sala":
+                        apiUrl = `${window.API_URL}/api/rooms/room?roomId=${id}`;
+                        formId = "salaForm";
+                        break;
+                    case "lista":
+                        apiUrl = `${window.API_URL}/api/lists/list?listId=${id}`;
+                        formId = "listaForm";
+                        break;
+                    case "palabra":
+                        apiUrl = `${window.API_URL}/api/words/word?wordId=${id}`;
+                        formId = "palabraForm";
+                        break;
+                }
+
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Datos recibidos:", data);
+                    if (data.data) {
+                        fillFormData(formId, select, data.data);
+                    }
+                }
+            } catch (error) {
+                console.error("Error cargando datos:", error);
+            }
+
+            // Load user lists if needed
+            const storedUserData = sessionStorage.getItem("userData");
+            if (storedUserData) {
+                const userData = JSON.parse(storedUserData);
+
+                try {
+                    const response = await fetch(
+                        `${window.API_URL}/api/lists?userId=${userData.id}`,
+                    );
+                    if (response.ok) {
+                        const lists = await response.json();
+                        populateWordListSelect(lists);
+                    }
+                } catch (error) {
+                    console.error("Error fetching lists:", error);
+                }
+            }
+
+            // Initialize form states
+            if (checkbox) {
+                numLivesInput.disabled = checkbox.checked;
+            }
+
+            if (showHintsCheckbox) {
+                cluesInputs.disabled = !showHintsCheckbox.checked;
+            }
+
+            // Configurar manejadores de formularios
+            setupFormHandlers();
+        });
+
+        // Llenar formularios con datos existentes
+        function fillFormData(formId, type, data) {
+            const form = document.getElementById(formId);
+
+            console.log("Datos recibidos para llenar formulario:", data);
+
+            if (!form) return;
+
+            switch (type) {
+                case "sala":
+                    console.log("Datos recibidos para edición:", data); // Para depuración
+                    console.log(parseInt(data.clue));
+
+                    form.roomName.value = data.roomname || "";
+                    form.roomDescription.value = data.description || "";
+                    form.unlimitedLives.checked = data.lives === -1;
+                    form.numLives.value = data.lives > 0 ? data.lives : "";
+                    form.showHints.checked = data.clue === 1 ? true : false;
+                    form.errorNumber.value =
+                        data.clueafter >= 0 ? data.clueafter : "";
+                    form.showFeedback.checked =
+                        data.feedback == 1 ? true : false;
+                    form.randomOrder.checked = data.random == 1 ? true : false;
+                    form.isOpen.value =
+                        data.isopen === 1 ? "isOpen" : "isClose";
+                    form.wordSource.value = data.isgeneral === 1 ? "0" : "1";
+                    break;
+
+                case "lista":
+                    form.listName.value = data.listname || "";
+                    form.descripcion.value = data.description || "";
+                    break;
+
+                case "palabra":
+                    form.wordName.value = data.word || "";
+                    form.wordSpanish.value = data.spanish || "";
+                    form.typeListSelect.value = data.type || "R";
+                    form.clue.value = data.clue || "";
+                    form.wordPast.value = data.simplepast || "";
+                    form.eg.value = data.example || "";
+                    break;
+            }
+        }
+
+        // Configurar manejadores para todos los formularios
+        function setupFormHandlers() {
+            // Formulario de Sala
+            const salaForm = document.getElementById("salaForm");
+            if (salaForm) {
+                salaForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(salaForm);
+
+                    const timestampOpen = formData.get("timestampOpen");
+                    const timestampClose = formData.get("timestampClose");
+                    const roomData = {
+                        id: formData.get("id"),
+                        roomName: formData.get("roomName"),
+                        roomDescription: formData.get("roomDescription"),
+                        lives:
+                            formData.get("unlimitedLives") === "on"
+                                ? -1
+                                : parseInt(formData.get("numLives")),
+                        clue: formData.get("showHints") === "on" ? 1 : 0,
+                        clueafter:
+                            formData.get("showHints") === "on"
+                                ? parseInt(formData.get("errorNumber"))
+                                : -1,
+                        feedback: formData.get("showFeedback") === "on" ? 1 : 0,
+                        random: formData.get("randomOrder") === "on" ? 1 : 0,
+                        isOpen: formData.get("isOpen") === "isOpen" ? 1 : 0,
+                        isgeneral: formData.get("wordSource") === "0" ? 1 : 0,
+                        lists_id:
+                            formData.get("wordSource") === "1"
+                                ? parseInt(formData.get("wordListSelect"))
+                                : 0,
+                        hasstartdatetime: ["1", "3"].includes(
+                            formData.get("statusSource"),
+                        )
+                            ? 1
+                            : 0,
+                        startdatetime: timestampOpen || null,
+                        hasenddatetime: ["2", "3"].includes(
+                            formData.get("statusSource"),
+                        )
+                            ? 1
+                            : 0,
+                        enddatetime: timestampClose || null,
+                    };
+
+                    try {
+                        const response = await fetch(
+                            `${window.API_URL}/api/rooms?roomId=${formData.get("id")}`,
+                            {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                },
+                                body: JSON.stringify(roomData),
+                            },
+                        );
+
+                        const responseDelete = await fetch(
+                            `${window.API_URL}/api/rooms/words/${formData.get("id")}`,
+                            {
+                                method: "DELETE",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                },
+                            },
+                        );
+
+                        if (roomData.isgeneral === 1) {
+                            // Obtener palabras del sistema (user_id = 1)
+                            const wordsResponse = await fetch(
+                                `${window.API_URL}/api/words/ids?userId=1`,
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                    },
+                                },
+                            );
+
+                            if (!wordsResponse.ok) {
+                                throw new Error(
+                                    "Error al obtener palabras del sistema",
+                                );
+                            }
+
+                            const systemWords = await wordsResponse.json();
+                            const wordsOfSystem = systemWords.map(
+                                (word) => word.id,
+                            );
+
+                            // Insertar palabras en la sala
+                            await addWordsToRoom(
+                                formData.get("id"),
+                                wordsOfSystem,
+                            );
+                        } else {
+                            // Obtener palabras de la lista seleccionada
+                            const listId = roomData.lists_id;
+                            const listWordsResponse = await fetch(
+                                `${window.API_URL}/api/lists/words/ids?listId=${listId}`,
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                    },
+                                },
+                            );
+
+                            if (!listWordsResponse.ok) {
+                                throw new Error(
+                                    "Error al obtener palabras de la lista",
+                                );
+                            }
+
+                            const listWords = await listWordsResponse.json();
+                            const wordsOfList = listWords.map(
+                                (word) => word.word_id,
+                            );
+
+                            // Insertar palabras en la sala
+                            await addWordsToRoom(
+                                formData.get("id"),
+                                wordsOfList,
+                            );
+                        }
+
+                        if (response.ok && responseDelete.ok) {
+                            alert("Sala actualizada correctamente");
+                            window.location.href = "/dashboard";
+                        } else {
+                            const error = await response.json();
+                            alert(`Error: ${error.message}`);
+                        }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        alert("Error de conexión");
+                    }
+                });
+            }
+
+            // Formulario de Lista
+            const listaForm = document.getElementById("listaForm");
+            if (listaForm) {
+                listaForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(listaForm);
+                    const listData = {
+                        id: formData.get("id"),
+                        listName: formData.get("listName"),
+                        description: formData.get("descripcion"),
+                    };
+
+                    try {
+                        const response = await fetch(
+                            `${window.API_URL}/api/lists?listId=${formData.get("id")}`,
+                            {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                },
+                                body: JSON.stringify(listData),
+                            },
+                        );
+
+                        if (response.ok) {
+                            alert("Lista actualizada correctamente");
+                            window.location.href = "/dashboard";
+                        } else {
+                            const error = await response.json();
+                            alert(`Error: ${error.message}`);
+                        }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        alert("Error de conexión");
+                    }
+                });
+            }
+
+            // Formulario de Palabra
+            const palabraForm = document.getElementById("palabraForm");
+            if (palabraForm) {
+                palabraForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(palabraForm);
+                    const wordData = {
+                        id: formData.get("id"),
+                        word: formData.get("wordName").toUpperCase(),
+                        type: formData.get("typeListSelect").toUpperCase(),
+                        spanish: formData.get("wordSpanish").toUpperCase(),
+                        clue: formData.get("clue").toUpperCase(),
+                        simplepast: formData.get("wordPast").toUpperCase(),
+                        example: formData.get("eg").toUpperCase(),
+                    };
+
+                    try {
+                        const response = await fetch(
+                            `${window.API_URL}/api/words?wordId=${formData.get("id")}`,
+                            {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                },
+                                body: JSON.stringify(wordData),
+                            },
+                        );
+
+                        if (response.ok) {
+                            alert("Palabra actualizada correctamente");
+                            window.location.href = "/dashboard";
+                        } else {
+                            const error = await response.json();
+                            alert(`Error: ${error.message}`);
+                        }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        alert("Error de conexión");
+                    }
+                });
+            }
+        }
+
+        async function addWordsToRoom(roomId, wordIds) {
+            try {
+                console.log("Enviando palabras al servidor:", {
+                    roomId,
+                    wordIds,
+                }); // Log frontend
+
+                const response = await fetch(
+                    `${window.API_URL}/api/rooms/words`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        },
+                        body: JSON.stringify({
+                            roomId,
+                            wordIds: Array.isArray(wordIds)
+                                ? wordIds
+                                : [wordIds], // Asegurar que sea array
+                        }),
+                    },
+                );
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    console.error("Error del servidor:", result); // Log del error del servidor
+                    throw new Error(
+                        result.message ||
+                            `Error ${response.status}: ${response.statusText}`,
+                    );
+                }
+
+                return result;
+            } catch (error) {
+                console.error("Error en addWordsToRoom:", {
+                    error: error.message,
+                    roomId,
+                    wordIds,
+                });
+                throw error;
+            }
+        }
+
+        function populateWordListSelect(lists) {
+            console.log("Listas recibidas:", lists.data);
+
+            const select = document.getElementById("wordListSelect");
+
+            // Limpiar opciones existentes (excepto la primera)
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+
+            // Verificar si hay listas y mostrarlas
+            if (lists.data && lists.data.length > 0) {
+                // Agregar nuevas opciones
+                lists.data.forEach((list) => {
+                    const option = document.createElement("option");
+                    option.value = list.id;
+                    option.textContent = list.listname;
+                    select.appendChild(option);
+                });
+            } else {
+                console.log("No hay listas disponibles");
+                // Opcional: agregar una opción indicando que no hay listas
+                const option = document.createElement("option");
+                option.value = "0";
+                option.textContent = "No tienes listas creadas";
+                option.disabled = true;
+                option.selected = true;
+                select.appendChild(option);
+            }
+        }
+
+        function toggleLivesInput() {
+            const checkbox = document.getElementById("unlimitedLives");
+            const numLivesInput = document.getElementById("numLives");
+
+            if (checkbox.checked) {
+                numLivesInput.disabled = true;
+            } else {
+                numLivesInput.disabled = false;
+            }
+        }
+
+        function toggleCluesInput() {
+            const cluesInputs = document.getElementById("errorNumber");
+            if (document.getElementById("showHints").checked) {
+                cluesInputs.disabled = false;
+            } else {
+                cluesInputs.disabled = true;
+            }
+        }
+
+        function toggleWordList() {
+            const wordList = document.getElementById("wordList");
+            const wordSource = document.getElementById("wordSource");
+
+            wordList.style.display =
+                wordSource.value === "1" ? "block" : "none";
+        }
+
+        // Add event listeners
+        document
+            .getElementById("unlimitedLives")
+            ?.addEventListener("change", toggleLivesInput);
+        document
+            .getElementById("showHints")
+            ?.addEventListener("change", toggleCluesInput);
+        document
+            .getElementById("wordSource")
+            ?.addEventListener("change", toggleWordList);
+    </script>
+</Layout>

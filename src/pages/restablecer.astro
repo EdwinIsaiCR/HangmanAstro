@@ -1,0 +1,30 @@
+---
+// src/pages/pagina-en-construccion.astro
+import Layout from '../layouts/Layout.astro';
+import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+---
+
+<Layout>
+  <div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+      <h1 class="display-5 fw-bold">No disponible</h1>
+      <p class="col-md-8 fs-4">
+        <h3>En construcción.</h3> 
+        Disculpe los inconvenientes que esta situación genera. Esta funcionalidad estará presente en un siguiente incremento.
+      </p>
+      <img src="/assets/img/error4.png" alt="Página en construcción" width="150px">
+      <form action="/dashboard" method="get">
+        <button type="submit" class="btn btn-success">Regresar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
+    integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+  </script>
+</Layout>

@@ -1,0 +1,210 @@
+---
+// addWords.astro
+import Layout from "../layouts/Layout.astro";
+import "../assets/css/editar.css";
+import "../assets/css/addWords.css";
+import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+
+// Obtener parámetros
+const { url } = Astro;
+const idLista = url.searchParams.get("id");
+
+if (!idLista) {
+    return Astro.redirect("/dashboard");
+}
+---
+
+<Layout title="Añadir Palabras">
+    <a href="/dashboard">
+        <button type="button" class="btn btn-danger regresar">Regresar</button>
+    </a>
+
+    <div class="listas">
+        <div id="listas_crear" class="content">
+            <div class="form-container">
+                <h1>Añadir palabras a Lista</h1>
+
+                <div id="word-list-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Palabra</th>
+                                <th>Español</th>
+                                <th>Tipo</th>
+                                <th>Pasado simple</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="words-table-body">
+                            <!-- Las palabras se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                    <button id="update-list-btn" class="form-button"
+                        >Actualizar lista</button
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Accede a la variable inyectada por Astro
+        const apiUrl = import.meta.env.PUBLIC_API_URL;
+        window.API_URL = apiUrl;
+      </script>
+
+    <script>
+document.addEventListener("DOMContentLoaded", async () => {
+    let userId = null;
+    const wordsTableBody = document.getElementById("words-table-body");
+    const updateListBtn = document.getElementById("update-list-btn");
+    const urlParams = new URLSearchParams(window.location.search);
+    const idLista = urlParams.get("id");
+    let allWords = [];
+    let wordsInList = [];
+    
+    const storedUserData = sessionStorage.getItem("userData");
+    if (storedUserData) {
+        const userData = JSON.parse(storedUserData);
+        userId = userData.id;
+    }
+
+    // Cargar palabras del usuario y palabras en la lista
+    async function loadWords() {
+        try {
+            // Obtener palabras del usuario
+            const wordsResponse = await fetch(
+                `${window.API_URL}/api/words?userId=${userId}`,
+            );
+            if (!wordsResponse.ok)
+                throw new Error("Error al cargar palabras");
+
+            // Obtener palabras en la lista actual
+            const listWordsResponse = await fetch(
+                `${window.API_URL}/api/lists/words?listId=${idLista}`,
+            );
+            if (!listWordsResponse.ok)
+                throw new Error("Error al cargar palabras de la lista");
+
+            const wordsData = await wordsResponse.json();
+            const listWordsData = await listWordsResponse.json();
+
+            console.log("Words data:", wordsData);
+            console.log("List words data:", listWordsData);
+            
+
+            // Asegurar que allWords es un array
+            allWords = Array.isArray(wordsData) ? wordsData : (wordsData.data || []);
+            
+            // Asegurar que wordsInList es un array
+            wordsInList = Array.isArray(listWordsData) ? listWordsData : (listWordsData.data || []);
+
+            console.log("All words:", allWords);
+            console.log("Words in list:", wordsInList);
+
+            renderWordsTable();
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error al cargar palabras");
+        }
+    }
+
+    // Renderizar la tabla de palabras
+    function renderWordsTable() {
+        wordsTableBody.innerHTML = "";
+
+        // Verificar que allWords es un array antes de usar forEach
+        if (!Array.isArray(allWords)) {
+            console.error("allWords no es un array:", allWords);
+            return;
+        }
+
+        allWords.forEach((word) => {
+            // Verificar si esta palabra ya está en la lista
+            let isChecked = false;
+            
+            if (Array.isArray(wordsInList)) {
+                // Verificar diferentes posibles estructuras de datos
+                isChecked = wordsInList.some((w) => {
+                    return w.id === word.id || 
+                           w.word_id === word.id || 
+                           w.wordId === word.id ||
+                           parseInt(w.id) === parseInt(word.id) ||
+                           parseInt(w.word_id) === parseInt(word.id);
+                });
+            }
+            
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <th>${word.id}</th>
+                <th>${word.word}</th>
+                <th>${word.spanish}</th>
+                <th>${word.type === "I" ? "Irregular" : "Regular"}</th>
+                <th>${word.simplepast || 'N/A'}</th>
+                <td>
+                    <input class="checkbox" type="checkbox" 
+                           id="word_${word.id}" 
+                           data-word-id="${word.id}" 
+                           ${isChecked ? "checked" : ""}>
+                </td>
+            `;
+
+            wordsTableBody.appendChild(row);
+        });
+    }
+
+    // Manejar la actualización de la lista
+    updateListBtn.addEventListener("click", async () => {
+        try {
+            const checkboxes = document.querySelectorAll(".checkbox:checked");
+            const selectedWordIds = Array.from(checkboxes).map((cb) =>
+                parseInt(cb.dataset.wordId),
+            );
+
+            // Validar que hay palabras seleccionadas
+            if (selectedWordIds.length === 0) {
+                alert("Selecciona al menos una palabra");
+                return;
+            }
+
+            const sendData = {
+                listId: parseInt(idLista),
+                wordIds: selectedWordIds,
+            };
+
+            console.log("Sending data:", sendData);
+
+            const response = await fetch(
+                `${window.API_URL}/api/lists/words`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                    body: JSON.stringify(sendData),
+                }
+            );
+
+            const responseData = await response.json();
+            console.log("Response:", responseData);
+
+            if (response.ok) {
+                alert(responseData.message || "Lista actualizada correctamente");
+                window.location.href = "/dashboard";
+            } else {
+                alert(`Error: ${responseData.message || "Error al actualizar la lista"}`);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión al actualizar la lista");
+        }
+    });
+
+    // Cargar palabras al iniciar
+    loadWords();
+});
+    </script>
+</Layout>

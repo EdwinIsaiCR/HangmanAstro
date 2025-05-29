@@ -106,6 +106,12 @@ const pageTitle = 'Registro';
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+  <script>
+    // Accede a la variable inyectada por Astro
+    const apiUrl = import.meta.env.PUBLIC_API_URL;
+    window.API_URL = apiUrl;
+  </script>
   
   <script is:inline>
     // Inicializar EmailJS y configurar formulario cuando el DOM está listo
@@ -150,7 +156,7 @@ const pageTitle = 'Registro';
         allowOutsideClick: false
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = "/login";
+          window.location.href = "/";
         }
       });
     }
@@ -255,7 +261,7 @@ const pageTitle = 'Registro';
           }
         });
 
-        const response = await fetch('http://localhost:3000/api/auth/register', {
+        const response = await fetch(`${window.API_URL}/api/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

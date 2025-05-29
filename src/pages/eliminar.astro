@@ -1,0 +1,112 @@
+---
+// eliminar.astro
+import Layout from "../layouts/Layout.astro";
+import "../assets/css/editar.css";
+import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+
+
+// Obtener parámetros
+const { url } = Astro;
+const id = url.searchParams.get("id");
+const select = url.searchParams.get("select");
+
+// Redirigir si no hay selección válida
+if (!select || !["sala", "lista", "palabra"].includes(select)) {
+    return Astro.redirect("/404");
+}
+---
+
+<Layout title="Eliminar">
+    <div class="confirmation-container">
+        <h2>Confirmar Eliminación</h2>
+        <p id="confirmation-message">¿Estás seguro de eliminar este elemento?</p>
+        <div class="button-group">
+            <button id="confirm-delete" class="btn btn-danger">Eliminar</button>
+            <a href="/dashboard" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </div>
+
+    <script>
+        // Accede a la variable inyectada por Astro
+        const apiUrl = import.meta.env.PUBLIC_API_URL;
+        window.API_URL = apiUrl;
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            const select = urlParams.get('select');
+            const confirmBtn = document.getElementById('confirm-delete');
+            const message = document.getElementById('confirmation-message');
+            
+            // Personalizar mensaje según el tipo
+            const typeNames = {
+                'sala': 'sala',
+                'lista': 'lista de palabras',
+                'palabra': 'palabra'
+            };
+            message.textContent = `¿Estás seguro de eliminar esta ${typeNames[select]}? Esta acción no se puede deshacer.`;
+
+            confirmBtn.addEventListener('click', async () => {
+                try {
+                    let endpoint = '';
+                    let body = { id };
+                    
+                    // Configurar según el tipo
+                    switch(select) {
+                        case 'sala':
+                            endpoint = `${window.API_URL}/api/rooms/${id}`;
+                            break;
+                        case 'lista':
+                            endpoint = `${window.API_URL}/api/lists/${id}`;
+                            break;
+                        case 'palabra':
+                            endpoint = `${window.API_URL}/api/words/${id}`;
+                            body = { ...body, isactive: 0 }; // Soft delete
+                            break;
+                    }
+
+                    const response = await fetch(endpoint, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (response.ok) {
+                        alert('Elemento eliminado correctamente');
+                        window.location.href = '/dashboard';
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.message || 'No se pudo eliminar'}`);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error de conexión al intentar eliminar');
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .confirmation-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2rem;
+            text-align: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        #confirmation-message {
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+        }
+    </style>
+</Layout>
