@@ -361,7 +361,7 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
 
                         // Verificar explícitamente si hay datos
                         if (result.success && result.data.length > 0) {
-                            populateWordListSelect(result);
+                            populateWordListSelect(result, selectList);
                         } else {
                             // Manejar caso sin listas
                             populateWordListSelect({
@@ -370,7 +370,7 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                                 message:
                                     result.message ||
                                     "No tienes listas creadas",
-                            });
+                            }, selectList);
                         }
                     } else {
                         // Manejar error de la API
@@ -379,7 +379,7 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                             success: false,
                             data: [],
                             message: "Error al cargar las listas",
-                        });
+                        }, selectList);
                     }
                 } catch (error) {
                     console.error("Error fetching lists:", error);
@@ -715,9 +715,8 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
             }
         }
 
-        function populateWordListSelect(lists) {
+        function populateWordListSelect(lists, selectList) {
     console.log("Listas recibidas:", lists.data);
-    const selectList = document.getElementById("wordListSelect"); // ✅ mover aquí
 
     if (!selectList) {
         console.error('No se encontró el elemento con id "wordListSelect".');
