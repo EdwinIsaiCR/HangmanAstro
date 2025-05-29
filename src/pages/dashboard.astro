@@ -694,63 +694,105 @@ let roomsData = [];
 
 		// Función para eliminar el elemento
 		async function deleteItem() {
-			const modal = document.getElementById("deleteModal");
-			modal.style.display = "none";
+    const modal = document.getElementById('deleteModal');
+    modal.style.display = 'none';
+    
+    if (!currentDeleteId || !currentDeleteType) return;
 
-			if (!currentDeleteId || !currentDeleteType) return;
+	console.log("Borrando datos");
+	
+    
+    try {
+        // Validaciones previas para listas
+        if (currentDeleteType === 'lista') {
+			console.log("Validando lista");
+            const roomsResponse = await fetch(`${window.API_URL}/api/rooms/checkList?listId=${currentDeleteId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            if (roomsResponse.ok) {
+                const data = await roomsResponse.json();
+				console.log(data);
+                if (data.inUse) {
+                    alert(`No puedes eliminar esta lista. Está siendo usada en ${data.usageCount} sala(s)`);
+                    return;
+                }
+            }
+        }
+        
+        // Validaciones previas para palabras
+        if (currentDeleteType === 'palabra') {
+            const listsResponse = await fetch(`${window.API_URL}/api/lists/checkWord?wordId=${currentDeleteId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            if (listsResponse.ok) {
+                const data = await listsResponse.json();
+                if (data.inUse) {
+                    alert(`No puedes eliminar esta palabra. Está en ${data.usageCount} lista(s)`);
+                    return;
+                }
+            }
+        }
 
-			try {
-				let endpoint = "";
-				let body = { id: currentDeleteId };
+        // Proceder con la eliminación si pasa las validaciones
+        let endpoint = '';
+        let body = { id: currentDeleteId };
 
-				switch (currentDeleteType) {
-					case "sala":
-						endpoint = `${window.API_URL}/api/rooms/${currentDeleteId}`;
-						break;
-					case "lista":
-						endpoint = `${window.API_URL}/api/lists/${currentDeleteId}`;
-						break;
-					case "palabra":
-						endpoint = `${window.API_URL}/api/words/${currentDeleteId}`;
-						body = { ...body, isactive: 0 }; // Soft delete
-						break;
-				}
+		console.log("Procediendo con la eliminación");
+        
+        switch(currentDeleteType) {
+            case 'sala':
+                endpoint = `${window.API_URL}/api/rooms/${currentDeleteId}`;
+                break;
+            case 'lista':
+                endpoint = `${window.API_URL}/api/lists/${currentDeleteId}`;
+                break;
+            case 'palabra':
+                endpoint = `${window.API_URL}/api/words/${currentDeleteId}`;
+                body = { ...body, isactive: 0 }; // Soft delete
+                break;
+        }
 
-				const response = await fetch(endpoint, {
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${localStorage.getItem("token")}`,
-					},
-					body: JSON.stringify(body),
-				});
+        const response = await fetch(endpoint, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(body)
+        });
 
-				if (response.ok) {
-					alert("Elemento eliminado correctamente");
-					// Recargar la sección correspondiente
-					switch (currentDeleteType) {
-						case "sala":
-							await loadRooms();
-							break;
-						case "lista":
-							await loadLists();
-							break;
-						case "palabra":
-							await loadWords();
-							break;
-					}
-				} else {
-					const error = await response.json();
-					alert(`Error: ${error.message || "No se pudo eliminar"}`);
-				}
-			} catch (error) {
-				console.error("Error:", error);
-				alert("Error de conexión al intentar eliminar");
-			} finally {
-				currentDeleteId = null;
-				currentDeleteType = null;
-			}
-		}
+        if (response.ok) {
+            alert('Elemento eliminado correctamente');
+            // Recargar la sección correspondiente
+            switch(currentDeleteType) {
+                case 'sala':
+                    await loadRooms();
+                    break;
+                case 'lista':
+                    await loadLists();
+                    break;
+                case 'palabra':
+                    await loadWords();
+                    break;
+            }
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.message || 'No se pudo eliminar'}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión al intentar eliminar');
+    } finally {
+        currentDeleteId = null;
+        currentDeleteType = null;
+    }
+}
 	</script>
 	<!-- Modal de confirmación -->
 	<div id="deleteModal" class="modal" style="display: none;">
