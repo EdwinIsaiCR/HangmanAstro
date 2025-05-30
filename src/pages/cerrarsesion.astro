@@ -1,10 +1,7 @@
 ---
-// src/pages/cerrarsesion.astro
 import Layout from '../layouts/Layout.astro';
 import '../assets/css/styledash.css';
 
-// NO hacer el logout aquí - se ejecuta en el servidor
-// El logout se hará en el cliente con JavaScript
 ---
 
 <Layout title="Cerrando sesión...">
@@ -48,7 +45,7 @@ import '../assets/css/styledash.css';
         
         const response = await fetch(`${window.API_URL}/api/auth/logout`, {
           method: 'POST',
-          credentials: 'include', // ← CRUCIAL - envía cookies del navegador
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           }
@@ -97,10 +94,8 @@ import '../assets/css/styledash.css';
       document.getElementById('error-state').style.display = 'block';
       document.getElementById('error-message').textContent = message;
       
-      // Opcional: redirigir al login después de unos segundos incluso con error
       setTimeout(() => {
         console.log('🔄 Redirigiendo al login por timeout...');
-        // Limpiar storage por si acaso
         if (typeof sessionStorage !== 'undefined') sessionStorage.clear();
         if (typeof localStorage !== 'undefined') localStorage.clear();
         window.location.href = '/login';

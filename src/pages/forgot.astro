@@ -1,5 +1,4 @@
 ---
-// src/pages/forgot.astro
 import Layout from '../layouts/Layout.astro';
 import "../assets/css/login.css";
 ---
@@ -79,16 +78,13 @@ import "../assets/css/login.css";
 
   <!-- Script principal -->
   <script is:inline>
-    // Esperar a que el DOM esté cargado
     document.addEventListener('DOMContentLoaded', function() {
-      // Verificar que EmailJS esté disponible
       if (typeof emailjs === 'undefined') {
         console.error('EmailJS no está cargado');
         alert('Error: No se pudo cargar el servicio de email');
         return;
       }
       
-      // Inicializar EmailJS
       emailjs.init('O3AE29jtznmBCGcVO');
       
       const form = document.getElementById("stripe-login");
@@ -110,13 +106,11 @@ import "../assets/css/login.css";
           const data = await response.json();
           
           if (response.ok && data.success) {
-            // Enviar email con token de reset
             try {
               await emailjs.send("TeamHangmanG", "HangmanGameReset", {
                 to_name: data.user.name,
                 to_mail: data.user.email,
                 to_password: data.user.password,
-                // NO enviar contraseña
               });
               
               alert("¡Exitoso! Se ha enviado un enlace de recuperación a tu correo. Si no lo ves en tu bandeja de entrada, revisa la carpeta de SPAM.");

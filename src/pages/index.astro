@@ -1,18 +1,668 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 
-import "../assets/vendor/bootstrap/css/bootstrap.min.css";
 import "../assets/vendor/bootstrap-icons/bootstrap-icons.css";
 import "../assets/vendor/boxicons/css/boxicons.min.css";
 import "../assets/vendor/glightbox/css/glightbox.min.css";
 import "../assets/vendor/remixicon/remixicon.css";
 import "../assets/vendor/swiper/swiper-bundle.min.css";
 import "../assets/css/style.css";
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Hangman Game">
+	<Header />
+	<section class="hero position-relative w-100 bg-primary" style="padding: 120px 0 0 0;">
+		<div class="hero-overlay position-absolute top-0 start-0 w-100 h-100" style="background: rgba(2, 5, 161, 0.91); z-index: 1;"></div>
+		<div class="container position-relative" style="z-index: 2;">
+		  <div class="row justify-content-between">
+			<div class="col-lg-7 pt-5 pt-lg-0 order-2 order-lg-1 d-flex align-items-center">
+			  <div data-aos="zoom-out">
+				<h1 class="mb-4 text-white-50" style="font-size: 48px; font-weight: 700; line-height: 56px;">
+				  Prototipo Software <span class="text-white border-bottom border-4 border-success">Hangman Game 2.0</span>
+				  - Simple Past Edition
+				</h1>
+				<h2 class="mb-4 text-white-50" style="font-size: 24px;">Juego "Hangman" 2.0 Edición Pasado Simple</h2>
+				<div class="text-center text-lg-start">
+				  <a href="#about" class="btn btn-success rounded-pill px-4 py-2 me-2 scrollto" style="font-family: 'Montserrat', sans-serif; font-weight: 500; letter-spacing: 1px;">Jugar</a>
+				  <a href="./login" class="btn btn-success rounded-pill px-4 py-2 me-2 scrollto" style="font-family: 'Montserrat', sans-serif; font-weight: 500; letter-spacing: 1px;">Iniciar sesión</a>
+				  <a href="./registro" class="btn btn-success rounded-pill px-4 py-2 scrollto" style="font-family: 'Montserrat', sans-serif; font-weight: 500; letter-spacing: 1px;">Registrarse</a>
+				</div>
+			  </div>
+			</div>
+			<div class="col-lg-4 order-1 order-lg-2" data-aos="zoom-out" data-aos-delay="300">
+			  <img src="" class="img-fluid animated" alt="" style="animation: up-down 2s ease-in-out infinite alternate-reverse both;" />
+			</div>
+		  </div>
+		</div>
+		<svg
+		  class="hero-waves d-block mt-5 w-100"
+		  style="height: 60px; z-index: 5; position: relative;"
+		  xmlns="http://www.w3.org/2000/svg"
+		  xmlns:xlink="http://www.w3.org/1999/xlink"
+		  viewBox="0 24 150 28"
+		  preserveAspectRatio="none"
+		>
+		  <defs>
+			<path
+			  id="wave-path"
+			  d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"
+			></defs>
+			<g class="wave1">
+			  <use
+				xlink:href="#wave-path"
+				x="50"
+				y="3"
+				fill="rgba(255,255,255, .1)"
+			  ></g>
+			  <g class="wave2">
+				<use
+				  xlink:href="#wave-path"
+				  x="50"
+				  y="0"
+				  fill="rgba(255,255,255, .2)"
+				></g>
+				<g class="wave3">
+				  <use
+					xlink:href="#wave-path"
+					x="50"
+					y="9"
+					fill="#fff"
+				  ></g>
+		</svg>
+	  </section>
+		<!-- End Hero -->
+
+		<main id="main">
+			<!-- Modal -->
+			<div
+							class="modal fade"
+							id="modlogin"
+							tabindex="-1"
+							role="dialog"
+							aria-labelledby="modalTitleId"
+							aria-hidden="true"
+						>
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5
+											class="modal-title"
+											id="modalTitleId"
+										>
+											Por favor, inicie sesión
+										</h5>
+										<button
+											type="button"
+											class="btn-close"
+											data-bs-dismiss="modal"
+											aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<div class="container-fluid">
+											<div
+												class="form-signin w-100 m-auto"
+											>
+												<form
+													action="javascript:void(0);"
+													method="post"
+													id="frmlogin"
+													onsubmit="iniciarSesion();"
+												>
+													<div
+														class="form-floating mb-2"
+													>
+														<input
+															type="email"
+															class="form-control"
+															id="txtemaillogin"
+															placeholder="nombre@ejemplo.com"
+														/>
+														<label
+															for="txtemaillogin"
+															>Email</label
+														>
+													</div>
+													<div
+														class="form-floating mb-2"
+													>
+														<input
+															type="password"
+															class="form-control"
+															id="txtpasswordlogin"
+															placeholder="Password"
+														/>
+														<label
+															for="txtpasswordlogin"
+															>Password</label
+														>
+													</div>
+
+													<div
+														class="checkbox mb-2"
+													>
+														<label>
+															<input
+																type="checkbox"
+																value="remember-me"
+															/> Recordarme
+														</label>
+													</div>
+											</div>
+										</div>
+									</div>
+										<div class="modal-footer">
+											<button
+												type="button"
+												id="btncancelar"
+												class="btn btn-secondary"
+												data-bs-dismiss="modal"
+												>Cancelar</button
+											>
+											<button
+												type="submit"
+												id="btnlogin"
+												class="btn btn-primary"
+												>Iniciar sesión</button
+											>
+										</div>
+									</form>
+									</div>
+								</div>
+							</div>
+
+						<!-- ======= About Section ======= -->
+						<section id="about" class="about pt-5">
+							<div class="container-fluid">
+							  <div class="row">
+								<div class="col-xl-5 col-lg-6 d-flex justify-content-center align-items-stretch" data-aos="fade-right">
+								  <img src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=600/uploads/users/211/posts/23041/final_image/hangmancapture.gif" class="img-fluid" alt="">
+								</div>
+								<div class="col-xl-7 col-lg-6 icon-boxes d-flex flex-column align-items-stretch justify-content-center py-5 px-lg-5" data-aos="fade-left">
+								  <h3 class="mb-3" style="font-size: 28px; font-weight: 700; color: #010483;">Jugar</h3>
+								  <p class="mb-4">Jugar en una sala o en nuestra "Arena" general.</p>
+								  
+								  <div class="icon-box mt-4" data-aos="zoom-in" data-aos-delay="100">
+									<div class="icon-box-container d-flex">
+									  <div class="icon d-flex align-items-center justify-content-center me-4" style="width: 64px; height: 64px; border: 2px solid #7ceec6; border-radius: 50px; transition: 0.5s;">
+										<a href="/arenagame"><i class="bx bx-game" style="color: #1acc8d; font-size: 32px;"></i></a>
+									  </div>
+									  <div>
+										<h4 class="title mb-2" style="font-weight: 700; font-size: 18px;">
+										  <a href="/arenagame" class="text-dark" style="transition: 0.3s;">Jugar en modo arena</a>
+										</h4>
+										<p class="description" style="line-height: 24px; font-size: 14px;">Sala de acceso general</p>
+									  </div>
+									</div>
+								  </div>
+								  
+								  <div class="icon-box mt-4" data-aos="zoom-in" data-aos-delay="200">
+									<div class="icon-box-container d-flex">
+									  <div class="icon d-flex align-items-center justify-content-center me-4" style="width: 64px; height: 64px; border: 2px solid #7ceec6; border-radius: 50px; transition: 0.5s;">
+										<a href="/login"><i class="bx bx-world" style="color: #1acc8d; font-size: 32px;"></i></a>
+									  </div>
+									  <div>
+										<h4 class="title mb-2" style="font-weight: 700; font-size: 18px;">
+										  <a href="/login" class="text-dark" style="transition: 0.3s;">Modo sala</a>
+										</h4>
+										<p class="description" style="line-height: 24px; font-size: 14px;">Se requiere código de sala</p>
+									  </div>
+									</div>
+								  </div>
+								  
+								  <div class="icon-box mt-4" data-aos="zoom-in" data-aos-delay="300">
+									<div class="icon-box-container d-flex">
+									  <div class="icon d-flex align-items-center justify-content-center me-4" style="width: 64px; height: 64px; border: 2px solid #7ceec6; border-radius: 50px; transition: 0.5s;">
+										<a href="/tablageneral"><i class="bx bx-table" style="color: #1acc8d; font-size: 32px;"></i></a>
+									  </div>
+									  <div>
+										<h4 class="title mb-2" style="font-weight: 700; font-size: 18px;">
+										  <a href="/tablageneral" class="text-dark" style="transition: 0.3s;">Ver la tabla de posiciones global</a>
+										</h4>
+										<p class="description" style="line-height: 24px; font-size: 14px;">Para jugadores en modo arena</p>
+									  </div>
+									</div>
+								  </div>
+								</div>
+							  </div>
+							</div>
+						  </section><!-- End About Section -->
+
+					<!-- ======= Features Section ======= -->
+					<section id="features" class="features">
+						<div class="container">
+						  <div class="section-title" data-aos="fade-up">
+							<h2>Manuales</h2>
+							<p>Descarga los manuales</p>
+						  </div>
+						  <div class="row" data-aos="fade-left">
+							<!-- Manual de instalación -->
+							<div class="col-lg-3 col-md-4 mb-4">
+							  <div class="d-flex align-items-center p-4 bg-light-blue rounded-3 transition-all hover-bg-lighter-blue" 
+								   data-aos="zoom-in" 
+								   data-aos-delay="50"
+								   style="transition: ease-in-out 0.3s;">
+								<a href="./assets/pdf/manual_instalacion.pdf" class="text-decoration-none">
+								  <i class="ri-store-line fs-3 me-3" style="color: #ffbb2c;"></i>
+								</a>
+								<h3 class="mb-0 fs-6 fw-bold">
+								  <a href="./assets/pdf/manual_instalacion.pdf" 
+									 target="_blank" 
+									 class="text-decoration-none text-primary-blue hover-text-darker-blue"
+									 style="color: #010483; transition: ease-in-out 0.3s;">
+									Manual de instalación
+								  </a>
+								</h3>
+							  </div>
+							</div>
+							
+							<!-- Manual de usuario -->
+							<div class="col-lg-3 col-md-4 mb-4">
+							  <div class="d-flex align-items-center p-4 bg-light-blue rounded-3 transition-all hover-bg-lighter-blue" 
+								   data-aos="zoom-in" 
+								   data-aos-delay="100"
+								   style="transition: ease-in-out 0.3s;">
+								<a href="./assets/pdf/manual_usuario.pdf" class="text-decoration-none">
+								  <i class="ri-bar-chart-box-line fs-3 me-3" style="color: #5578ff;"></i>
+								</a>
+								<h3 class="mb-0 fs-6 fw-bold">
+								  <a href="./assets/pdf/manual_usuario.pdf" 
+									 target="_blank" 
+									 class="text-decoration-none text-primary-blue hover-text-darker-blue"
+									 style="color: #010483; transition: ease-in-out 0.3s;">
+									Manual de usuario
+								  </a>
+								</h3>
+							  </div>
+							</div>
+						  </div>
+						</div>
+					  </section><!-- End Features Section -->
+
+					<!-- ======= Counts Section ======= -->
+					<section id="counts" class="py-5" style="background: #f5f5ff;">
+						<div class="container">
+						  <div class="row g-4" data-aos="fade-up">
+							<!-- Juegos en arena -->
+							<div class="col-lg-3 col-md-6">
+							  <div class="count-box position-relative text-center bg-white p-4" style="padding: 30px 30px 25px 30px !important;">
+								<i class="bi bi-emoji-smile position-absolute top-10 start-50 translate-middle bg-success rounded-circle d-inline-flex align-items-center justify-content-center fs-5"
+								   style="width: 48px; height: 48px; padding: 12px; color: #fff; line-height: 0; margin-top: -25px;"></i>
+								<span class="d-block fs-1 fw-semibold" style="color: #010483;" 
+									  data-purecounter-start="0" 
+									  data-purecounter-end="232" 
+									  data-purecounter-duration="1" 
+									  class="purecounter">232</span>
+								<p class="mb-0 font-montserrat">Juegos en arena</p>
+							  </div>
+							</div>
+					  
+							<!-- Juegos en salas -->
+							<div class="col-lg-3 col-md-6">
+							  <div class="count-box position-relative text-center bg-white p-4" style="padding-bottom: 25px !important;">
+								<i class="bi bi-journal-richtext position-absolute top-10 start-50 translate-middle bg-success rounded-circle d-inline-flex align-items-center justify-content-center fs-5"
+								   style="width: 48px; height: 48px; padding: 12px; color: #fff; line-height: 0; margin-top: -25px;"></i>
+								<span class="d-block fs-1 fw-semibold" style="color: #010483;" 
+									  data-purecounter-start="0" 
+									  data-purecounter-end="521" 
+									  data-purecounter-duration="1" 
+									  class="purecounter">521</span>
+								<p class="mb-0 font-montserrat">Juegos en salas</p>
+							  </div>
+							</div>
+					  
+							<!-- Verbos regulares -->
+							<div class="col-lg-3 col-md-6">
+							  <div class="count-box position-relative text-center bg-white p-4" style="padding-bottom: 25px !important;">
+								<i class="bi bi-headset position-absolute top-10 start-50 translate-middle bg-success rounded-circle d-inline-flex align-items-center justify-content-center fs-5"
+								   style="width: 48px; height: 48px; padding: 12px; color: #fff; line-height: 0; margin-top: -25px;"></i>
+								<span class="d-block fs-1 fw-semibold" style="color: #010483;" 
+									  data-purecounter-start="0" 
+									  data-purecounter-end="50" 
+									  data-purecounter-duration="1" 
+									  class="purecounter">50</span>
+								<p class="mb-0 font-montserrat">Verbos regulares</p>
+							  </div>
+							</div>
+					  
+							<!-- Verbos irregulares -->
+							<div class="col-lg-3 col-md-6">
+							  <div class="count-box position-relative text-center bg-white p-4" style="padding-bottom: 25px !important;">
+								<i class="bi bi-people position-absolute top-10 start-50 translate-middle bg-success rounded-circle d-inline-flex align-items-center justify-content-center fs-5"
+								   style="width: 48px; height: 48px; padding: 12px; color: #fff; line-height: 0; margin-top: -25px;"></i>
+								<span class="d-block fs-1 fw-semibold" style="color: #010483;" 
+									  data-purecounter-start="0" 
+									  data-purecounter-end="50" 
+									  data-purecounter-duration="1" 
+									  class="purecounter">50</span>
+								<p class="mb-0 font-montserrat">Verbos irregulares</p>
+							  </div>
+							</div>
+					  
+							<!-- Usuarios registrados -->
+							<div class="col-lg-3 col-md-6 mt-4 mt-lg-0">
+							  <div class="count-box position-relative text-center bg-white p-4" style="padding-bottom: 25px !important;">
+								<i class="bi bi-people position-absolute top-10 start-50 translate-middle bg-success rounded-circle d-inline-flex align-items-center justify-content-center fs-5"
+								   style="width: 48px; height: 48px; padding: 12px; color: #fff; line-height: 0; margin-top: -25px;"></i>
+								<span class="d-block fs-1 fw-semibold" style="color: #010483;" 
+									  data-purecounter-start="0" 
+									  data-purecounter-end="10" 
+									  data-purecounter-duration="1" 
+									  class="purecounter">10</span>
+								<p class="mb-0 font-montserrat">Usuarios registrados</p>
+							  </div>
+							</div>
+						  </div>
+						</div>
+					  </section><!-- End Counts Section -->
+
+					  <!-- ======= Gallery Section ======= -->
+					  <section id="gallery" class="py-5">
+						<div class="container">
+						  <div class="section-title" data-aos="fade-up">
+							<h2>Galería</h2>
+							<p>Observa nuestra galería</p>
+						  </div>
+						  
+						  <div class="row g-0" data-aos="fade-left">
+							<!-- Gallery Item 1 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="100">
+								<a href="./img/gallery/gallery-1.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-1.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 2 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="150">
+								<a href="./img/gallery/gallery-2.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-2.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 3 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="200">
+								<a href="./img/gallery/gallery-3.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-3.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 4 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="250">
+								<a href="./img/gallery/gallery-4.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-4.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 5 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="300">
+								<a href="./img/gallery/gallery-5.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-5.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 6 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="350">
+								<a href="./img/gallery/gallery-6.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-6.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 7 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="400">
+								<a href="./img/gallery/gallery-7.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-7.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 8 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="450">
+								<a href="./img/gallery/gallery-8.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-8.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 9 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="450">
+								<a href="./img/gallery/gallery-9.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-9.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 10 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="450">
+								<a href="./img/gallery/gallery-10.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-10.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+							
+							<!-- Gallery Item 11 -->
+							<div class="col-lg-3 col-md-4 overflow-hidden border-end border-bottom border-3 border-white">
+							  <div class="gallery-item" data-aos="zoom-in" data-aos-delay="450">
+								<a href="./img/gallery/gallery-11.jpg" class="gallery-lightbox d-block">
+								  <img src="./img/gallery/gallery-11.jpg" alt="" class="img-fluid w-100 hover-scale">
+								</a>
+							  </div>
+							</div>
+						  </div>
+						</div>
+					  </section><!-- End Gallery Section -->
+
+					<!-- ======= Team Section ======= -->
+					<section id="team" class="team">
+						<div class="container">
+							<div class="section-title" data-aos="fade-up">
+								<h2>Equipo</h2>
+								<p>Nuestro gran equipo</p>
+							</div>
+							<div class="row" data-aos="fade-left">
+								<div class="col-lg-3 col-md-6 shadow-lg">
+									<div
+										class="member"
+										data-aos="zoom-in"
+										data-aos-delay="100"
+									>
+										<div class="pic">
+											<img
+												src="./img/teamfondo.png"
+												class="img-fluid"
+												alt=""
+											/>
+										</div>
+										<div class="member-info">
+											<h4>Angela Flores Díaz</h4>
+											<span>Autor 1</span>
+											<div class="social">
+												<a href=""
+													><i
+														class="bi bi-twitter"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-facebook"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-instagram"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-linkedin"
+													></i></a
+												>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div
+									class="col-lg-3 col-md-6 mt-5 mt-md-0 shadow-lg"
+								>
+									<div
+										class="member"
+										data-aos="zoom-in"
+										data-aos-delay="200"
+									>
+										<div class="pic">
+											<img
+												src="./img/teamfondo.png"
+												class="img-fluid"
+												alt=""
+											/>
+										</div>
+										<div class="member-info">
+											<h4>Edwin I. Cruz Ramírez</h4>
+											<span>Autor 2</span>
+											<div class="social">
+												<a href=""
+													><i
+														class="bi bi-twitter"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-facebook"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-instagram"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-linkedin"
+													></i></a
+												>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div
+									class="col-lg-3 col-md-6 mt-5 mt-lg-0 shadow-lg"
+								>
+									<div
+										class="member"
+										data-aos="zoom-in"
+										data-aos-delay="400"
+									>
+										<div class="pic">
+											<img
+												src="./img/teamfondo.png"
+												class="img-fluid"
+												alt=""
+											/>
+										</div>
+										<div class="member-info">
+											<h4>Roberto Ruiz Mendoza</h4>
+											<span>Asesor técnico</span>
+											<div class="social">
+												<a href=""
+													><i
+														class="bi bi-twitter"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-facebook"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-instagram"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-linkedin"
+													></i></a
+												>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div
+									class="col-lg-3 col-md-6 mt-5 mt-lg-0 shadow-lg"
+								>
+									<div
+										class="member"
+										data-aos="zoom-in"
+										data-aos-delay="400"
+									>
+										<div class="pic">
+											<img
+												src="./img/teamfondo.png"
+												class="img-fluid"
+												alt=""
+											/>
+										</div>
+										<div class="member-info">
+											<h4>
+												Elva Yuridia Morales Luis
+											</h4>
+											<span>Asesora metodológica</span
+											>
+											<div class="social">
+												<a href=""
+													><i
+														class="bi bi-twitter"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-facebook"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-instagram"
+													></i></a
+												>
+												<a href=""
+													><i
+														class="bi bi-linkedin"
+													></i></a
+												>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section><!-- End Team Section -->
+				</main>
+
+				<a
+					href="#"
+					class="back-to-top d-flex align-items-center justify-content-center"
+				>
+					<i class="bi bi-arrow-up-short"></i>
+				</a>
+				<div id="preloader"></div>
+			</defs>
+		</svg>
+	</section>
+	<Footer />
 </Layout>

@@ -4,15 +4,6 @@ import Layout from "../layouts/Layout.astro";
 import "../assets/css/styledash.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 import "../assets/css/salas.css";
-import QRCode from "../components/QRCode.astro";
-
-// Variables que se llenarán desde el cliente
-let userData = null;
-let userId = null;
-let roomsData = [];
-
-// En el servidor, solo preparamos las variables
-// Los datos reales se cargarán desde el cliente
 ---
 
 <Layout title="Dashboard">
@@ -146,113 +137,7 @@ let roomsData = [];
 				<h2>Tus salas</h2>
 				<div class="container">
 					<div id="rooms-container">
-						{
-							roomsData.length > 0 ? (
-								<table>
-									<thead>
-										<tr>
-											<th>ID</th>
-											<th>Nombre</th>
-											<th>Descripción</th>
-											<th>Vidas</th>
-											<th>Pista</th>
-											<th>Pista Después de</th>
-											<th>¿Mostrar Feedback?</th>
-											<th>¿Palabras Random?</th>
-											<th>¿Está Abierta?</th>
-											<th>Fuente de palabras</th>
-											<th>Creada</th>
-											<th>Código de Sala</th>
-											<th>QR</th>
-											<th>Acciones</th>
-										</tr>
-									</thead>
-									<tbody>
-										{roomsData.map((room, index) => (
-											<tr>
-												<th>{room.id}</th>
-												<th>{room.roomname}</th>
-												<th>{room.description}</th>
-												<th>
-													{room.lives === -1
-														? "ilimitadas"
-														: room.lives}
-												</th>
-												<th>
-													{room.clue === 1
-														? "Si"
-														: "No"}
-												</th>
-												<th>
-													{room.clue === 1
-														? `${room.clueafter} intentos`
-														: "Desactivado"}
-												</th>
-												<th>
-													{room.feedback === 1
-														? "Si"
-														: "No"}
-												</th>
-												<th>
-													{room.random === 1
-														? "Si"
-														: "No"}
-												</th>
-												<th>
-													{room.isopen === 1
-														? "Si"
-														: "No"}
-												</th>
-												<th>
-													{room.isgeneral === 1
-														? "Sistema"
-														: `Lista: ${room.listName || ""}`}
-												</th>
-												<th>{room.timestamp}</th>
-												<th>{room.roomcode}</th>
-												<th>
-													<div
-														id={`qrcode-${index}`}
-													/>
-												</th>
-												<th>
-													<a
-														href={`/editar?id=${room.id}&select=sala`}
-														class="users-table--edit"
-													>
-														Editar
-													</a>
-													<br />
-													<a
-														href={`/restablecer?id=${room.id}`}
-														class="users-table--edit"
-													>
-														Restablecer horario
-													</a>
-													<br />
-													<a
-														href={`/eliminar?id=${room.id}&select=sala`}
-														onclick="return confirm('¿Estás seguro de eliminar la sala ${room.id}?')"
-														class="users-table--delete"
-													>
-														Eliminar
-													</a>
-													<br />
-													<a
-														href={`/inforoom?id=${room.id}&select=sala`}
-														class="users-table--more"
-													>
-														Ver mas
-													</a>
-												</th>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							) : (
-								<p>No hay salas registradas.</p>
-							)
-						}
+						<p>Cargando salas...</p>
 					</div>
 				</div>
 			</div>
@@ -281,6 +166,25 @@ let roomsData = [];
 				</div>
 			</div>
 		</div>
+
+		<!-- Modal de confirmación -->
+		<div id="deleteModal" class="modal" style="display: none;">
+			<div class="modal-content">
+				<span class="close-modal">&times;</span>
+				<h3 id="modal-title">Confirmar eliminación</h3>
+				<p id="modal-message">
+					¿Estás seguro de que deseas eliminar este elemento?
+				</p>
+				<div class="modal-buttons">
+					<button id="confirm-delete" class="btn btn-danger"
+						>Eliminar</button
+					>
+					<button id="cancel-delete" class="btn btn-secondary"
+						>Cancelar</button
+					>
+				</div>
+			</div>
+		</div>
 	</main>
 
 	<script>
@@ -290,7 +194,7 @@ let roomsData = [];
 	</script>
 
 	<script is:inline>
-		// 1. Cargar datos del usuario
+		//Cargar datos del usuario
 		document.addEventListener("DOMContentLoaded", async () => {
 			try {
 				const storedUserData = sessionStorage.getItem("userData");
@@ -300,7 +204,6 @@ let roomsData = [];
 				}
 
 				userData = JSON.parse(storedUserData);
-				console.log("Datos de usuario:", userData);
 
 				// Actualizar UI
 				document.querySelectorAll(".nav-link").forEach((el) => {
@@ -316,7 +219,7 @@ let roomsData = [];
 			}
 		});
 
-		// 2. Función para cargar salas (mejorada)
+		//Función para cargar salas
 		async function loadRooms() {
 			const container = document.getElementById("rooms-container");
 			container.innerHTML = "<p>Cargando salas...</p>";
@@ -336,7 +239,6 @@ let roomsData = [];
 				if (!listResponse.ok)
 					throw new Error(`Error: ${listResponse.status}`);
 				const { data: lists } = await listResponse.json();
-				console.log("Listas:", lists);
 
 				if (!rooms?.length) {
 					container.innerHTML = "<p>No hay salas registradas.</p>";
@@ -358,7 +260,7 @@ let roomsData = [];
 			}
 		}
 
-		// 3. Generar tabla de salas
+		//Generar tabla de salas
 		function generateRoomsTable(rooms, lists) {
 			return `
 		  <table>
@@ -366,18 +268,18 @@ let roomsData = [];
 			  <tr>
 				<th>ID</th>
 				<th>Nombre</th>
-				              <th>Descripción</th>
-              <th>Vidas</th>
-              <th>Pista</th>
-              <th>Pista Después de</th>
-              <th>¿Mostrar Feedback?</th>
-              <th>¿Palabras Random?</th>
-              <th>¿Está Abierta?</th>
-              <th>Fuente de palabras</th>
-              <th>Creada</th>
-              <th>Código de Sala</th>
-              <th>QR</th>
-              <th>Acciones</th>
+				<th>Descripción</th>
+				<th>Vidas</th>
+				<th>Pista</th>
+				<th>Pista Después de</th>
+				<th>¿Mostrar Feedback?</th>
+				<th>¿Palabras Random?</th>
+				<th>¿Está Abierta?</th>
+				<th>Fuente de palabras</th>
+				<th>Creada</th>
+				<th>Código de Sala</th>
+				<th>QR</th>
+				<th>Acciones</th>
 			  </tr>
 			</thead>
 			<tbody>
@@ -413,10 +315,8 @@ let roomsData = [];
 		`;
 		}
 
-		// 4. Generar códigos QR (con verificación)
+		// Generar códigos QR
 		async function generateQRCodes(rooms) {
-			console.log("Generando QR codes para", rooms.length, "salas");
-
 			rooms.forEach((room, i) => {
 				const element = document.getElementById(`qrcode-${i}`);
 				if (!element) {
@@ -425,10 +325,8 @@ let roomsData = [];
 				}
 
 				try {
-					// Construir la URL del QR (ajusta según tu necesidad)
-					const qrString =
-						room.qrstring ||
-						`${window.location.origin}/unirseSala?codigo=${room.roomcode}`;
+					// Construir la URL del QR
+					const qrString = room.qrstring;
 
 					// Usar QR Server API (servicio gratuito y confiable)
 					const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&format=png&data=${encodeURIComponent(qrString)}`;
@@ -442,16 +340,10 @@ let roomsData = [];
                         width="100" 
                         height="100"
                         style="border: 1px solid #ddd; border-radius: 4px; display: block; margin: 0 auto;"
-                        onload="console.log('QR ${i} cargado correctamente')"
                         onerror="handleQRError(this, '${room.roomcode}')"
                     />
                 </div>
             `;
-
-					console.log(
-						`QR generado para sala ${room.roomcode}:`,
-						qrUrl,
-					);
 				} catch (error) {
 					console.error(
 						`Error generando QR para sala ${room.id}:`,
@@ -461,12 +353,6 @@ let roomsData = [];
 					element.innerHTML = createQRFallback(room.roomcode);
 				}
 			});
-		}
-
-		// Función de manejo de errores para las imágenes QR
-		function handleQRError(img, roomcode) {
-			console.error("Error cargando imagen QR para:", roomcode);
-			img.parentElement.innerHTML = createQRFallback(roomcode);
 		}
 
 		// Crear fallback cuando el QR no se puede cargar
@@ -590,9 +476,6 @@ let roomsData = [];
 
 				const result = await response.json();
 
-				// Verifica la estructura de la respuesta
-				console.log("Respuesta del servidor:", result);
-
 				// Asegúrate de trabajar con un array
 				const listsData = Array.isArray(result.data)
 					? result.data
@@ -647,6 +530,7 @@ let roomsData = [];
 					"<p>Error al conectar con el servidor.</p>";
 			}
 		}
+
 		// Función para mostrar/ocultar secciones
 		function toggleContent(id) {
 			const element = document.getElementById(id);
@@ -655,6 +539,7 @@ let roomsData = [];
 				element.style.display = isHidden ? "block" : "none";
 			}
 		}
+
 		// Variables para el modal
 		let currentDeleteId = null;
 		let currentDeleteType = null;
@@ -694,124 +579,111 @@ let roomsData = [];
 
 		// Función para eliminar el elemento
 		async function deleteItem() {
-    const modal = document.getElementById('deleteModal');
-    modal.style.display = 'none';
-    
-    if (!currentDeleteId || !currentDeleteType) return;
+			const modal = document.getElementById("deleteModal");
+			modal.style.display = "none";
 
-	console.log("Borrando datos");
-	
-    
-    try {
-        // Validaciones previas para listas
-        if (currentDeleteType === 'lista') {
-			console.log("Validando lista");
-            const roomsResponse = await fetch(`${window.API_URL}/api/rooms/checkList?listId=${currentDeleteId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            
-            if (roomsResponse.ok) {
-                const data = await roomsResponse.json();
-				console.log(data);
-                if (data.inUse) {
-                    alert(`No puedes eliminar esta lista. Está siendo usada en ${data.usageCount} sala(s)`);
-                    return;
-                }
-            }
-        }
-        
-        // Validaciones previas para palabras
-        if (currentDeleteType === 'palabra') {
-            const listsResponse = await fetch(`${window.API_URL}/api/lists/checkWord?wordId=${currentDeleteId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            
-            if (listsResponse.ok) {
-                const data = await listsResponse.json();
-                if (data.inUse) {
-                    alert(`No puedes eliminar esta palabra. Está en ${data.usageCount} lista(s)`);
-                    return;
-                }
-            }
-        }
+			if (!currentDeleteId || !currentDeleteType) return;
 
-        // Proceder con la eliminación si pasa las validaciones
-        let endpoint = '';
-        let body = { id: currentDeleteId };
+			try {
+				// Validaciones previas para listas
+				if (currentDeleteType === "lista") {
+					console.log("Validando lista");
+					const roomsResponse = await fetch(
+						`${window.API_URL}/api/rooms/checkList?listId=${currentDeleteId}`,
+						{
+							headers: {
+								Authorization: `Bearer ${localStorage.getItem("token")}`,
+							},
+						},
+					);
 
-		console.log("Procediendo con la eliminación");
-        
-        switch(currentDeleteType) {
-            case 'sala':
-                endpoint = `${window.API_URL}/api/rooms/${currentDeleteId}`;
-                break;
-            case 'lista':
-                endpoint = `${window.API_URL}/api/lists/${currentDeleteId}`;
-                break;
-            case 'palabra':
-                endpoint = `${window.API_URL}/api/words/${currentDeleteId}`;
-                body = { ...body, isactive: 0 }; // Soft delete
-                break;
-        }
+					if (roomsResponse.ok) {
+						const data = await roomsResponse.json();
+						console.log(data);
+						if (data.inUse) {
+							alert(
+								`No puedes eliminar esta lista. Está siendo usada en ${data.usageCount} sala(s)`,
+							);
+							return;
+						}
+					}
+				}
 
-        const response = await fetch(endpoint, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(body)
-        });
+				// Validaciones previas para palabras
+				if (currentDeleteType === "palabra") {
+					const listsResponse = await fetch(
+						`${window.API_URL}/api/lists/checkWord?wordId=${currentDeleteId}`,
+						{
+							headers: {
+								Authorization: `Bearer ${localStorage.getItem("token")}`,
+							},
+						},
+					);
 
-        if (response.ok) {
-            alert('Elemento eliminado correctamente');
-            // Recargar la sección correspondiente
-            switch(currentDeleteType) {
-                case 'sala':
-                    await loadRooms();
-                    break;
-                case 'lista':
-                    await loadLists();
-                    break;
-                case 'palabra':
-                    await loadWords();
-                    break;
-            }
-        } else {
-            const error = await response.json();
-            alert(`Error: ${error.message || 'No se pudo eliminar'}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error de conexión al intentar eliminar');
-    } finally {
-        currentDeleteId = null;
-        currentDeleteType = null;
-    }
-}
+					if (listsResponse.ok) {
+						const data = await listsResponse.json();
+						if (data.inUse) {
+							alert(
+								`No puedes eliminar esta palabra. Está en ${data.usageCount} lista(s)`,
+							);
+							return;
+						}
+					}
+				}
+
+				// Proceder con la eliminación si pasa las validaciones
+				let endpoint = "";
+				let body = { id: currentDeleteId };
+
+				switch (currentDeleteType) {
+					case "sala":
+						endpoint = `${window.API_URL}/api/rooms/${currentDeleteId}`;
+						break;
+					case "lista":
+						endpoint = `${window.API_URL}/api/lists/${currentDeleteId}`;
+						break;
+					case "palabra":
+						endpoint = `${window.API_URL}/api/words/${currentDeleteId}`;
+						body = { ...body, isactive: 0 };
+						break;
+				}
+
+				const response = await fetch(endpoint, {
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${localStorage.getItem("token")}`,
+					},
+					body: JSON.stringify(body),
+				});
+
+				if (response.ok) {
+					alert("Elemento eliminado correctamente");
+					// Recargar la sección correspondiente
+					switch (currentDeleteType) {
+						case "sala":
+							await loadRooms();
+							break;
+						case "lista":
+							await loadLists();
+							break;
+						case "palabra":
+							await loadWords();
+							break;
+					}
+				} else {
+					const error = await response.json();
+					alert(`Error: ${error.message || "No se pudo eliminar"}`);
+				}
+			} catch (error) {
+				console.error("Error:", error);
+				alert("Error de conexión al intentar eliminar");
+			} finally {
+				currentDeleteId = null;
+				currentDeleteType = null;
+			}
+		}
 	</script>
-	<!-- Modal de confirmación -->
-	<div id="deleteModal" class="modal" style="display: none;">
-		<div class="modal-content">
-			<span class="close-modal">&times;</span>
-			<h3 id="modal-title">Confirmar eliminación</h3>
-			<p id="modal-message">
-				¿Estás seguro de que deseas eliminar este elemento?
-			</p>
-			<div class="modal-buttons">
-				<button id="confirm-delete" class="btn btn-danger"
-					>Eliminar</button
-				>
-				<button id="cancel-delete" class="btn btn-secondary"
-					>Cancelar</button
-				>
-			</div>
-		</div>
-	</div>
 
 	<style>
 		.modal {

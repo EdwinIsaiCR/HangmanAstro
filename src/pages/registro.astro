@@ -1,15 +1,11 @@
 ---
-// src/pages/registro.astro
 import Layout from '../layouts/Layout.astro';
 import '../assets/css/login.css';
-
-const pageTitle = 'Registro';
 ---
 
-<Layout title={pageTitle}>
+<Layout title={"Registrar usuario"}>
   <div class="login-root">
     <div class="box-root flex-flex flex-direction--column" style="min-height: 100vh;flex-grow: 1;">
-      <!-- Fondo decorativo (igual que en login) -->
       <div class="loginbackground box-background--white padding-top--64">
         <div class="loginbackground-gridContainer">
           <div class="box-root flex-flex" style="grid-area: top / start / 8 / end;">
@@ -44,7 +40,6 @@ const pageTitle = 'Registro';
         </div>
       </div>
 
-      <!-- Formulario principal -->
       <div class="box-root padding-top--24 flex-flex flex-direction--column" style="flex-grow: 1; z-index: 9;">
         <div class="box-root padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center">
           <h1><a href="/" rel="dofollow"></a></h1>
@@ -114,7 +109,6 @@ const pageTitle = 'Registro';
   </script>
   
   <script is:inline>
-    // Inicializar EmailJS y configurar formulario cuando el DOM está listo
     document.addEventListener('DOMContentLoaded', () => {
       // Asegurarse de que SweetAlert2 está cargado
       if (typeof Swal === 'undefined') {
@@ -136,12 +130,10 @@ const pageTitle = 'Registro';
 
     // Función para inicializar todos los manejadores del formulario
     function initializeFormHandlers() {
-      // Event listeners para validación en tiempo real
       document.getElementById("password").addEventListener("input", checkPasswordMatch);
       document.getElementById("confirmPassword").addEventListener("input", checkPasswordMatch);
       document.getElementById("rol").addEventListener("change", validateSelect);
       
-      // Manejar envío del formulario
       document.getElementById("register-form").addEventListener("submit", handleFormSubmit);
     }
 
@@ -250,7 +242,6 @@ const pageTitle = 'Registro';
       };
 
       try {
-        // Mostrar indicador de carga
         const loadingAlert = Swal.fire({
           title: "Registrando...",
           text: "Por favor espera",
@@ -270,7 +261,6 @@ const pageTitle = 'Registro';
           credentials: 'include'
         });
 
-        // Cerrar indicador de carga
         loadingAlert.close();
 
         const data = await response.json();

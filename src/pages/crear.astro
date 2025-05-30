@@ -1,9 +1,7 @@
 ---
-// crear.astro
 import Layout from "../layouts/Layout.astro";
 import "../assets/css/editar.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
-
 
 // Obtener parámetros de la URL
 const { url } = Astro;
@@ -152,13 +150,13 @@ const select = url.searchParams.get("select");
     // Accede a la variable inyectada por Astro
     const apiUrl = import.meta.env.PUBLIC_API_URL;
     window.API_URL = apiUrl;
+    const publicUrl = import.meta.env.PUBLIC_URL;
+    window.PUBLIC_URL = publicUrl;
 </script>
 
 <script>
-    // Cargar datos iniciales y configurar formularios
     let userId;
     document.addEventListener("DOMContentLoaded", async () => {
-        // Configurar eventos para los toggle
         setupFormToggles();
 
         const storedUserData = sessionStorage.getItem("userData");
@@ -187,18 +185,14 @@ const select = url.searchParams.get("select");
         
         if (response.ok) {
             const lists = await response.json();
-            console.log("Listas recibidas:", lists.data); // Para depuración
             
             const select = document.getElementById('wordListSelect');
             
-            // Limpiar opciones existentes (excepto la primera)
             while (select.options.length > 1) {
                 select.remove(1);
             }
             
-            // Verificar si hay listas y mostrarlas
             if (lists.data && lists.data.length > 0) {
-                // Agregar nuevas opciones
                 lists.data.forEach(list => {
                     const option = document.createElement('option');
                     option.value = list.id;
@@ -206,8 +200,6 @@ const select = url.searchParams.get("select");
                     select.appendChild(option);
                 });
             } else {
-                console.log("No hay listas disponibles");
-                // Opcional: agregar una opción indicando que no hay listas
                 const option = document.createElement('option');
                 option.value = "0";
                 option.textContent = "No tienes listas creadas";
@@ -280,141 +272,132 @@ const select = url.searchParams.get("select");
         const salaForm = document.getElementById('salaForm');
         if (salaForm) {
             salaForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+                e.preventDefault();
     
-    const formData = new FormData(salaForm);
+                const formData = new FormData(salaForm);
 
-    const { roomcode, qrcode } = await generateUniqueRoomCode();
-    console.log('Código de sala generado:', roomcode);
-    console.log('QR Code URL:', qrcode);
+                const { roomcode, qrcode } = await generateUniqueRoomCode();
     
-    // Obtener y formatear las fechas correctamente
-    const timestampOpen = formData.get('timestampOpen');
-    const timestampClose = formData.get('timestampClose');
+                // Obtener y formatear las fechas correctamente
+                const timestampOpen = formData.get('timestampOpen');
+                const timestampClose = formData.get('timestampClose');
     
-    const roomData = {
-        userId,
-        roomName: formData.get('roomName'),
-        roomDescription: formData.get('roomDescription'),
-        lives: formData.get('unlimitedLives') === 'on' ? -1 : parseInt(formData.get('numLives')),
-        clue: formData.get('showHints') === 'on' ? 1 : 0,
-        clueafter: formData.get('showHints') === 'on' ? parseInt(formData.get('errorNumber')) : -1,
-        feedback: formData.get('showFeedback') === 'on' ? 1 : 0,
-        random: formData.get('randomOrder') === 'on' ? 1 : 0,
-        isOpen: formData.get('isOpen') === 'isOpen' ? 1 : 0,
-        isgeneral: formData.get('wordSource') === '0' ? 1 : 0,
-        lists_id: formData.get('wordSource') === '1' ? parseInt(formData.get('wordListSelect')) : 0,
-        hasstartdatetime: ['1', '3'].includes(formData.get('statusSource')) ? 1 : 0,
-        startdatetime: timestampOpen || null,
-        hasenddatetime: ['2', '3'].includes(formData.get('statusSource')) ? 1 : 0,
-        enddatetime: timestampClose || null,
-        roomcode,
-        qrcode
-    };
+                const roomData = {
+                    userId,
+                    roomName: formData.get('roomName'),
+                    roomDescription: formData.get('roomDescription'),
+                    lives: formData.get('unlimitedLives') === 'on' ? -1 : parseInt(formData.get('numLives')),
+                    clue: formData.get('showHints') === 'on' ? 1 : 0,
+                    clueafter: formData.get('showHints') === 'on' ? parseInt(formData.get('errorNumber')) : -1,
+                    feedback: formData.get('showFeedback') === 'on' ? 1 : 0,
+                    random: formData.get('randomOrder') === 'on' ? 1 : 0,
+                    isOpen: formData.get('isOpen') === 'isOpen' ? 1 : 0,
+                    isgeneral: formData.get('wordSource') === '0' ? 1 : 0,
+                    lists_id: formData.get('wordSource') === '1' ? parseInt(formData.get('wordListSelect')) : 0,
+                    hasstartdatetime: ['1', '3'].includes(formData.get('statusSource')) ? 1 : 0,
+                    startdatetime: timestampOpen || null,
+                    hasenddatetime: ['2', '3'].includes(formData.get('statusSource')) ? 1 : 0,
+                    enddatetime: timestampClose || null,
+                    roomcode,
+                    qrcode
+                };
 
-    console.log('Datos a enviar:', roomData);
+                try {
+                    const createResponse = await fetch(`${window.API_URL}/api/rooms`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(roomData)
+                    });
 
-    try {
-            // 1. Crear la sala
-            const createResponse = await fetch(`${window.API_URL}/api/rooms`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(roomData)
+                    if (!createResponse.ok) {
+                        const error = await createResponse.json();
+                        throw new Error(error.message || 'Error al crear la sala');
+                    }
+
+                    const createResult = await createResponse.json();
+                    const nuevaID = createResult.roomId;
+
+                    if (roomData.isgeneral === 1) {
+                        // Obtener palabras del sistema (user_id = 1)
+                        const wordsResponse = await fetch(`${window.API_URL}/api/words/ids?userId=1`, {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+
+                        if (!wordsResponse.ok) {
+                            throw new Error('Error al obtener palabras del sistema');
+                        }
+
+                        const systemWords = await wordsResponse.json();
+                        const wordsOfSystem = systemWords.map(word => word.id);
+
+                        // Insertar palabras en la sala
+                        await addWordsToRoom(nuevaID, wordsOfSystem);
+                    } else {
+                        // Obtener palabras de la lista seleccionada
+                        const listId = roomData.lists_id;
+                        const listWordsResponse = await fetch(`${window.API_URL}/api/lists/words/ids?listId=${listId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+
+                        if (!listWordsResponse.ok) {
+                            throw new Error('Error al obtener palabras de la lista');
+                        }
+
+                        const listWords = await listWordsResponse.json();
+                        const wordsOfList = listWords.map(word => word.word_id);
+
+                        // Insertar palabras en la sala
+                        await addWordsToRoom(nuevaID, wordsOfList);
+                    }
+
+                    alert('Sala creada correctamente con sus palabras');
+                    window.location.href = './dashboard';
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert(`Error: ${error.message || 'Error al crear la sala'}`);
+                }
             });
-
-            if (!createResponse.ok) {
-                const error = await createResponse.json();
-                throw new Error(error.message || 'Error al crear la sala');
-            }
-
-            const createResult = await createResponse.json();
-            console.log('Sala creada:', createResult);
-            const nuevaID = createResult.roomId; // Asegúrate que tu API devuelva el ID de la sala creada
-
-            // 2. Agregar palabras a la sala según la fuente seleccionada
-            if (roomData.isgeneral === 1) {
-                // Obtener palabras del sistema (user_id = 1)
-                const wordsResponse = await fetch(`${window.API_URL}/api/words/ids?userId=1`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!wordsResponse.ok) {
-                    throw new Error('Error al obtener palabras del sistema');
-                }
-
-                const systemWords = await wordsResponse.json();
-                const wordsOfSystem = systemWords.map(word => word.id);
-
-                // Insertar palabras en la sala
-                await addWordsToRoom(nuevaID, wordsOfSystem);
-            } else {
-                // Obtener palabras de la lista seleccionada
-                const listId = roomData.lists_id;
-                const listWordsResponse = await fetch(`${window.API_URL}/api/lists/words/ids?listId=${listId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!listWordsResponse.ok) {
-                    throw new Error('Error al obtener palabras de la lista');
-                }
-
-                const listWords = await listWordsResponse.json();
-                const wordsOfList = listWords.map(word => word.word_id);
-
-                // Insertar palabras en la sala
-                await addWordsToRoom(nuevaID, wordsOfList);
-            }
-
-            alert('Sala creada correctamente con sus palabras');
-            window.location.href = './dashboard';
-            
-        } catch (error) {
-            console.error('Error:', error);
-            alert(`Error: ${error.message || 'Error al crear la sala'}`);
-        }
-});
         }
 
         async function addWordsToRoom(roomId, wordIds) {
-  try {
-    console.log('Enviando palabras al servidor:', { roomId, wordIds }); // Log frontend
+            try {
+                const response = await fetch(`${window.API_URL}/api/rooms/words`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        roomId,
+                        wordIds: Array.isArray(wordIds) ? wordIds : [wordIds]
+                    })
+                });
 
-    const response = await fetch(`${window.API_URL}/api/rooms/words`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({
-        roomId,
-        wordIds: Array.isArray(wordIds) ? wordIds : [wordIds] // Asegurar que sea array
-      })
-    });
-
-    const result = await response.json();
+                const result = await response.json();
     
-    if (!response.ok) {
-      console.error('Error del servidor:', result); // Log del error del servidor
-      throw new Error(result.message || `Error ${response.status}: ${response.statusText}`);
-    }
+                if (!response.ok) {
+                    console.error('Error del servidor:', result); // Log del error del servidor
+                    throw new Error(result.message || `Error ${response.status}: ${response.statusText}`);
+                }
 
-    return result;
-  } catch (error) {
-    console.error('Error en addWordsToRoom:', { 
-      error: error.message,
-      roomId,
-      wordIds 
-    });
-    throw error;
-  }
-}
+                return result;
+            } catch (error) {
+                console.error('Error en addWordsToRoom:', { 
+                    error: error.message,
+                    roomId,
+                    wordIds 
+                });
+                throw error;
+            }
+        }
 
         // Formulario de Lista
         const listaForm = document.getElementById('listaForm');
@@ -428,8 +411,6 @@ const select = url.searchParams.get("select");
                     description: formData.get('descripcion'),
                     userId
                 };
-
-                console.log('Datos a enviar:', listData);
                 
                 try {
                     const response = await fetch(`${window.API_URL}/api/lists`, {
@@ -472,8 +453,6 @@ const select = url.searchParams.get("select");
                     example: formData.get('eg').toUpperCase()
                 };
 
-                console.log('Datos a enviar:', wordData);
-
                 try {
                     const response = await fetch(`${window.API_URL}/api/words`, {
                         method: 'POST',
@@ -499,43 +478,45 @@ const select = url.searchParams.get("select");
         }
     }
 
+    // Verificar si el código es único
     async function isRoomCodeUnique(code) {
-  try {
-    const response = await fetch(`${window.API_URL}/api/rooms/checkCode?code=${encodeURIComponent(code)}`);
-    if (!response.ok) throw new Error('Error en la respuesta del servidor');
+        try {
+            const response = await fetch(`${window.API_URL}/api/rooms/checkCode?code=${encodeURIComponent(code)}`);
+            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+            
+            const data = await response.json();
+            return data.success && !data.exists;
     
-    const data = await response.json();
-    return data.success && !data.exists;
+        } catch (error) {
+            console.error('Error verificando código:', error);
+            return false; // En caso de error, asumimos que no es único
+        }
+    }
+
+    // Generar un código único
+    async function generateUniqueRoomCode() {
+        let roomcode;
+        let isUnique = false;
     
-  } catch (error) {
-    console.error('Error verificando código:', error);
-    return false; // En caso de error, asumimos que no es único
-  }
-}
+        while (!isUnique) {
+            roomcode = generateRoomCode();
+            isUnique = await isRoomCodeUnique(roomcode);
+        }
+  
+        const qrcode = `${window.PUBLIC_URL}/roomgame?roomcode=${roomcode}`;
+        return { roomcode, qrcode };
+    }
 
-async function generateUniqueRoomCode() {
-  let roomcode;
-  let isUnique = false;
+    // Función para generar un código aleatorio de 6 caracteres
+    function generateRoomCode() {
+        let roomcode = '';
+        const caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   
-  while (!isUnique) {
-    roomcode = generateRoomCode();
-    isUnique = await isRoomCodeUnique(roomcode);
-  }
+        for (let i = 0; i < 6; i++) {
+            roomcode += caracteres[Math.floor(Math.random() * caracteres.length)];
+        }
   
-  const qrcode = `${window.API_URL}/roomgame?roomcode=${roomcode}`;
-  return { roomcode, qrcode };
-}
-
-// Función para generar un código aleatorio de 6 caracteres
-function generateRoomCode() {
-  let roomcode = '';
-  const caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  
-  for (let i = 0; i < 6; i++) {
-    roomcode += caracteres[Math.floor(Math.random() * caracteres.length)];
-  }
-  
-  return roomcode;
-}
+        return roomcode;
+    }
 </script>
 </Layout>

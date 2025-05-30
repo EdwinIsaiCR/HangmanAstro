@@ -1,9 +1,10 @@
 ---
-// src/pages/arenagame.astro
+
 import ArenaLayout from "../layouts/ArenaLayout.astro";
-// Styles
+
 import "../assets/css/arenagame.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
+
 ---
 
 <ArenaLayout title="Jugar en Arena">
@@ -330,8 +331,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           try {
             const data = await fetch(`${window.API_URL}/api/words?userId=1`);
             const verbos = await data.json();
-            this.verbos = verbos.data;
-            console.log("verbos", this.verbos);
+            this.verbos = verbos;
             this.iniciar();
           } catch (error) {
             console.error("Error loading verbs:", error);
@@ -342,7 +342,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           const n = this.verbos.length;
 
           if (n == 0) {
-            this.terminar(); // Llama a terminar si ya no quedan verbos
+            this.terminar();
             return null;
           }
 

@@ -1,5 +1,4 @@
 ---
-// src/pages/tableroom.astro
 import TablaLayout from "../layouts/TablaLayout.astro";
 import "../assets/css/arenagame.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
@@ -7,25 +6,42 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 
 <TablaLayout title="Hangman: Tabla de posiciones de la sala">
   <main>
-    <div id="loading" class="row justify-content-center align-items-center g-2" style="height: 50vh;">
+    <div
+      id="loading"
+      class="row justify-content-center align-items-center g-2"
+      style="height: 50vh;"
+    >
       <div class="spinner-border text-success" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-    
+
     <div class="container-sm">
-      <div style="height: 90vh" class="modal modal-dialog modal-dialog-scrollable" id="modalId" tabindex="-1"
-          data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-labelledby="modalTitleId"
-          aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+      <div
+        style="height: 90vh"
+        class="modal modal-dialog modal-dialog-scrollable"
+        id="modalId"
+        tabindex="-1"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        role="dialog"
+        aria-labelledby="modalTitleId"
+        aria-hidden="true"
+      >
+        <div
+          class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg"
+          role="document"
+        >
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="modalTitleId">Tabla de posiciones</h5>
             </div>
             <div class="modal-body">
               <div class="table-responsive">
-                <table style="font-size: 0.7rem;"
-                  class="table table-striped table-hover table-borderless table-success align-middle">
+                <table
+                  style="font-size: 0.7rem;"
+                  class="table table-striped table-hover table-borderless table-success align-middle"
+                >
                   <thead class="table-light">
                     <tr>
                       <th>#</th>
@@ -36,14 +52,17 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                       <th>Observ</th>
                     </tr>
                   </thead>
-                  <tbody id="players" class="table-group-divider">
-                  </tbody>
+                  <tbody id="players" class="table-group-divider"> </tbody>
                 </table>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-success" data-bs-dismiss="modal"
-                onclick="window.location='/dashboard'">Cerrar</button>
+              <button
+                type="button"
+                class="btn btn-success"
+                data-bs-dismiss="modal"
+                onclick="window.location='/dashboard'">Cerrar</button
+              >
             </div>
           </div>
         </div>
@@ -58,90 +77,86 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
   </script>
 
   <script is:inline>
-    // Obtener parámetros de la URL
     const urlParams = new URLSearchParams(window.location.search);
-    const roomid = urlParams.get('r');
-    
-    // Verificar sesión
-    const storedUserData = sessionStorage.getItem('userData');
-    if (!storedUserData) {
-      window.location.href = '/login';
-    }
-    
-    const userData = JSON.parse(storedUserData);
-    const userid = userData.id;
+    const roomid = urlParams.get("r");
 
-    // Inicializar modal
-    const myModal = new bootstrap.Modal(document.getElementById('modalId'));
-    
-    // Función para cargar la tabla
+    const storedUserData = sessionStorage.getItem("userData");
+    if (!storedUserData) {
+      window.location.href = "/login";
+    }
+
+    const myModal = new bootstrap.Modal(document.getElementById("modalId"));
+
     const loadLeaderboard = async () => {
       try {
-        const response = await fetch(`${window.API_URL}/api/roomgame/tablaroom`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `${window.API_URL}/api/roomgame/tablaroom`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ idrm: roomid }),
           },
-          body: JSON.stringify({ idrm: roomid })
-        });
-        
+        );
+
         if (!response.ok) {
-          throw new Error('Error al cargar la tabla');
+          throw new Error("Error al cargar la tabla");
         }
-        
+
         const datas = await response.json();
         const data = datas.data;
         console.log(data);
-        
-        const tableBody = document.getElementById('players');
-        
-        // Limpiar tabla
-        tableBody.innerHTML = '';
+
+        const tableBody = document.getElementById("players");
+
+        tableBody.innerHTML = "";
 
         if (Array.isArray(data)) {
-      // Si es un array (múltiples registros)
-      data.forEach((registro, index) => {
-        tableBody.appendChild(createTableRow(registro, index));
-      });
-    } else if (data && typeof data === 'object') {
-      // Si es un solo objeto (un registro)
-      tableBody.appendChild(createTableRow(data, 0));
-    } else {
-      throw new Error('Formato de datos no reconocido');
-    }
-    
-        
-        // Ocultar spinner y mostrar modal
-        document.getElementById('loading').classList.add('d-none');
+          data.forEach((registro, index) => {
+            tableBody.appendChild(createTableRow(registro, index));
+          });
+        } else if (data && typeof data === "object") {
+          tableBody.appendChild(createTableRow(data, 0));
+        } else {
+          throw new Error("Formato de datos no reconocido");
+        }
+
+        document.getElementById("loading").classList.add("d-none");
         myModal.show();
-        
       } catch (error) {
-        console.error('Error:', error);
-        alert('Error al cargar la tabla de posiciones');
-        window.location.href = '/dashboard';
+        console.error("Error:", error);
+        alert("Error al cargar la tabla de posiciones");
+        window.location.href = "/dashboard";
       }
     };
 
     function createTableRow(registro, index) {
-  const row = document.createElement('tr');
-  row.innerHTML = `
+      const row = document.createElement("tr");
+      row.innerHTML = `
     <td>${index + 1}</td>
             <td><img src="./img/avatar/0.png" width="20" alt="Avatar"></td>
             <td>${registro.name}</td>
             <td>${registro.score}</td>
             <td>${registro.totaltime}</td>
             <td>
-              ${registro.status == 1 ? 'Se rindió' : 
-                registro.status == -1 ? 'Vidas Ilimitadas' : 
-                registro.status == 2 ? 'Acabó verbos' : 'Acabó vidas'}
+              ${
+                registro.status == 1
+                  ? "Se rindió"
+                  : registro.status == -1
+                    ? "Vidas Ilimitadas"
+                    : registro.status == 2
+                      ? "Acabó verbos"
+                      : "Acabó vidas"
+              }
             </td>
   `;
-  return row;
-}
-    
+      return row;
+    }
+
     // Cargar la tabla cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
       loadLeaderboard();
     });
   </script>
-</Layout>
+</TablaLayout>

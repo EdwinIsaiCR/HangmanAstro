@@ -1,5 +1,4 @@
 ---
-// Importaciones y lógica del lado del servidor de Astro
 import TablaLayout from '../layouts/TablaLayout.astro';
 import "../assets/css/arenagame.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
@@ -13,8 +12,6 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
       </div>
     </div>
     
-    <!-- Modal Body -->
-    <!-- if you want to close by clicking outside the modal, delete the last endpoint:data-bs-backdrop and data-bs-keyboard -->
     <div class="container-sm">
       <div style="height: 90vh" class="modal modal-dialog modal-dialog-scrollable" id="modalId" tabindex="-1"
         data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-labelledby="modalTitleId"
@@ -74,14 +71,11 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
       const response = await fetch(`${window.API_URL}/api/arenagame/tablaGeneral`);
       const data = await response.json();
 
-      // Oculta el loader
       if (loadingDiv && loadingDiv.parentNode) {
         loadingDiv.parentNode.removeChild(loadingDiv);
       }
-      // Muestra el modal
       myModal.show();
 
-      // Llena la tabla con los datos
       data.forEach((registro, index) => {
         const row = document.createElement("tr");
         row.innerHTML = `

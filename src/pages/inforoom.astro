@@ -1,9 +1,7 @@
 ---
-// src/pages/inforoom.astro
 import Layout from '../layouts/Layout.astro';
 import "../assets/css/inforoom.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
-const { id } = Astro.params;
 ---
 <Layout>
     <a href="/dashboard"><button type="button" class="btn btn-danger regresar">Regresar</button></a>
@@ -15,7 +13,6 @@ const { id } = Astro.params;
             </div>
 
             <div class="contenedor-tablas">
-                <!-- Primera tabla -->
                 <div class="tabla1">
                     <table>
                         <caption>Info. Sala</caption>
@@ -31,7 +28,6 @@ const { id } = Astro.params;
                     </table>
                 </div>
 
-                <!-- Segunda tabla -->
                 <div class="tabla2">
                     <div class="container2">
                         <table class="tabla">
@@ -169,7 +165,6 @@ const { id } = Astro.params;
                 
                 const roomDatas = await response.json();
                 const roomData = roomDatas.data;
-                console.log(roomData);
 
                 const wordsResponse = await fetch(`${window.API_URL}/api/rooms/${id}/words`);
                 if (!wordsResponse.ok) throw new Error('Error al cargar palabras');
@@ -186,7 +181,6 @@ const { id } = Astro.params;
                 const qrString = roomData.qrstring || `${window.location.origin}/unirseSala?codigo=${roomData.roomcode}`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&format=png&data=${encodeURIComponent(qrString)}`;
 
-                // Mostrar información básica
                 document.getElementById('roomInfo').innerHTML = `
                     <tr>
                         <td>Codigo de sala</td>
@@ -212,7 +206,6 @@ const { id } = Astro.params;
                         width="100" 
                         height="100"
                         style="border: 1px solid #ddd; border-radius: 4px; display: block; margin: 0 auto;"
-                        onload="console.log('QR cargado correctamente')"
                         onerror="handleQRError(this, '${roomData.roomcode}')"
                     /></div></td>
                     </tr>
@@ -242,7 +235,6 @@ const { id } = Astro.params;
                     </tr>
                 `;
                 
-                // Generar QR
                 if (typeof QRCode !== 'undefined' && roomData.qrstring) {
                     new QRCode(document.getElementById("qrcode"), {
                         text: roomData.qrstring,
@@ -267,7 +259,6 @@ const { id } = Astro.params;
                 
                 const players = await response.json();
                 const playersData = players.players;
-                console.log(playersData);
                 
                 let html = '';
                 

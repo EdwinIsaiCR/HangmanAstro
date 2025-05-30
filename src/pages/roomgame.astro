@@ -1,11 +1,7 @@
 ---
-// src/pages/playroom.astro
 import ArenaLayout from "../layouts/Layout.astro";
 import "../assets/css/arenagame.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
-
-// Obtener parámetro de la URL
-const roomcode = Astro.url.searchParams.get("roomcode");
 ---
 
 <ArenaLayout title="Jugar en Sala">
@@ -261,10 +257,8 @@ const roomcode = Astro.url.searchParams.get("roomcode");
       "use strict";
 
       const HangmanGame = {
-        // Elementos DOM
         dom: null,
 
-        // Estado del juego
         state: {
           verboJuega: null,
           vidas: 0,
@@ -295,13 +289,11 @@ const roomcode = Astro.url.searchParams.get("roomcode");
           userId: null,
         },
 
-        // Modales
         modals: {
           nombre: null,
           result: null,
         },
 
-        // Inicialización
         init: async function () {
           try {
             this.cacheDom();
@@ -380,7 +372,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
             });
         },
 
-        // Lógica del juego
         randomKey: function (max) {
           return Math.floor(Math.random() * max);
         },
@@ -409,7 +400,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
             this.state.randomWords = data.random.data[0] === 1;
             this.state.systemWords = data.isgeneral.data[0] === 1;
 
-            // Actualizar modal con datos
             document.getElementById("roomname").textContent =
               `Nombre de la sala: ${data.roomname}`;
             document.getElementById("description").textContent =
@@ -431,12 +421,12 @@ const roomcode = Astro.url.searchParams.get("roomcode");
             const response = await fetch(
               `${window.API_URL}/api/words/room`,
               {
-                method: "POST", // Cambiado a POST para enviar en el body
+                method: "POST",
                 headers: {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  roomid: this.state.idroom, // Envías el roomid en el body
+                  roomid: this.state.idroom,
                 }),
               },
             );
@@ -480,18 +470,15 @@ const roomcode = Astro.url.searchParams.get("roomcode");
 
         iniciar: function () {
           try {
-            // Resetear interfaz
             for (let i = 2; i <= 7; i++) {
               document.getElementById(`img${i}`).style.visibility = "hidden";
             }
 
             this.dom.loading.classList.add("d-none");
 
-            // Seleccionar nuevo verbo
             this.state.verboJuega = this.seleccionaVerbo();
             if (!this.state.verboJuega) return;
 
-            // Resetear estado
             this.state.errores = 0;
             this.state.aciertos = 0;
             this.state.intentos = 6;
@@ -500,7 +487,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
               "_",
             );
 
-            // Actualizar UI
             this.dom.spanVidas.textContent =
               this.state.vidas <= -1
                 ? "Ilimitadas"
@@ -552,7 +538,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
               .catch((e) => console.warn("Error al reproducir sonido:", e));
 
             if (this.state.verboArray.includes(letra)) {
-              // Letra correcta
               this.state.verboArray.forEach((car, ind) => {
                 if (car === letra) {
                   this.state.verboDashes[ind] = car;
@@ -574,7 +559,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
                 this.adivinarPasado();
               }
             } else {
-              // Letra incorrecta
               this.state.intentos--;
               this.state.errores++;
               this.state.puntos = Math.max(0, this.state.puntos - 1);
@@ -738,7 +722,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
           }
         },
 
-        // Temporizador
         actualizarContador: function () {
           this.state.segundos++;
 
@@ -780,7 +763,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
           this.state.horas = 0;
         },
 
-        // API Calls
         async datailgameroom() {
           
           try {
@@ -837,49 +819,47 @@ const roomcode = Astro.url.searchParams.get("roomcode");
         },
 
         async terminar() {
-  try {
-    // Ocultar elementos del juego de manera segura
-    const elementsToHide = [
-      'loading', 'vidas', 'rendirse', 'verbo', 
-      'pista', 'divHangman', 'puntos'
-    ];
+          try {
+            const elementsToHide = [
+              'loading', 'vidas', 'rendirse', 'verbo', 
+              'pista', 'divHangman', 'puntos'
+            ];
 
-    elementsToHide.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.style.display = id === 'loading' ? 'block' : 'none';
-      }
-    });
+            elementsToHide.forEach(id => {
+              const element = document.getElementById(id);
+              if (element) {
+                element.style.display = id === 'loading' ? 'block' : 'none';
+              }
+            });
 
-    const rindioSend = this.state.seRindio ? 1 : 0;
-    const puntosSend = this.state.vidas <= -1 ? this.state.puntos : 
+            const rindioSend = this.state.seRindio ? 1 : 0;
+            const puntosSend = this.state.vidas <= -1 ? this.state.puntos : 
                       this.state.seRindio ? 0 : this.state.puntos;
-    const statusSend = this.state.vidas <= -1 ? -1 : 
+            const statusSend = this.state.vidas <= -1 ? -1 : 
                       this.state.seRindio ? 1 : 
                       this.state.verbosfinish ? 2 : 0;
 
-    const response = await fetch(`${window.API_URL}/api/roomgame/finish`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userid: this.state.userId,
-        idgr: this.state.idgameroom,
-        puntos: puntosSend,
-        rindio: rindioSend,
-        status: statusSend,
-      }),
-    });
+            const response = await fetch(`${window.API_URL}/api/roomgame/finish`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userid: this.state.userId,
+                idgr: this.state.idgameroom,
+                puntos: puntosSend,
+                rindio: rindioSend,
+                status: statusSend,
+              }),
+            });
 
-    if (!response.ok) throw new Error("Error al finalizar juego");
+            if (!response.ok) throw new Error("Error al finalizar juego");
 
-    window.location.href = `/tableroom?r=${this.state.idroom}`;
-  } catch (error) {
-    console.error("Error en terminar:", error);
-    alert("Error al finalizar el juego. Intenta nuevamente.");
-    // Redirigir a dashboard como fallback
-    window.location.href = '/dashboard';
-  }
-},
+            window.location.href = `/tableroom?r=${this.state.idroom}`;
+          } catch (error) {
+            console.error("Error en terminar:", error);
+            alert("Error al finalizar el juego. Intenta nuevamente.");
+            window.location.href = '/dashboard';
+          }
+        },
         aJugar: async function () {
           try {
             this.modals.nombre.hide();
@@ -907,10 +887,8 @@ const roomcode = Astro.url.searchParams.get("roomcode");
         },
       };
 
-      // Inicializar el juego cuando el DOM esté listo
       document.addEventListener("DOMContentLoaded", () => {
         try {
-          // Limpiar spinners si existen
           const spinners = document.querySelectorAll(
             '.spinner-border, [role="status"]',
           );
@@ -919,7 +897,6 @@ const roomcode = Astro.url.searchParams.get("roomcode");
           );
 
           HangmanGame.init();
-          window.hangmanApp = HangmanGame; // Solo para depuración
         } catch (error) {
           console.error("Error en inicialización global:", error);
           alert(

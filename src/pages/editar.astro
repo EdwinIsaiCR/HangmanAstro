@@ -1,5 +1,5 @@
 ---
-// editar.astro
+
 import Layout from "../layouts/Layout.astro";
 import "../assets/css/editar.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
@@ -9,10 +9,6 @@ const { url } = Astro;
 const id = url.searchParams.get("id");
 const select = url.searchParams.get("select");
 
-// Redirect if no valid selection
-if (!select || !["sala", "lista", "palabra"].includes(select)) {
-    return Astro.redirect("/404");
-}
 ---
 
 <Layout title="Editar">
@@ -317,7 +313,6 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                 toggleWordList(true);
             }
 
-            // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get("id");
             const select = urlParams.get("select");
@@ -331,9 +326,7 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                     case "sala":
                         apiUrl = `${window.API_URL}/api/rooms/room?roomId=${id}`;
                         formId = "salaForm";
-                        const storedUserData =
-                            sessionStorage.getItem("userData");
-                        // En la parte donde cargas las listas, cambia esto:
+                        const storedUserData = sessionStorage.getItem("userData");
                         if (storedUserData) {
                             const userData = JSON.parse(storedUserData);
                             try {
@@ -364,7 +357,6 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                 const response = await fetch(apiUrl);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log("Datos recibidos:", data, apiUrl, select);
                     if (data) {
                         fillFormData(formId, select, data);
                     }
@@ -373,7 +365,6 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                 console.error("Error cargando datos:", error);
             }
 
-            // Initialize form states
             if (checkbox) {
                 numLivesInput.disabled = checkbox.checked;
             }
@@ -390,13 +381,10 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
         function fillFormData(formId, type, data) {
             const form = document.getElementById(formId);
 
-            console.log("Datos recibidos para llenar formulario:", data);
-
             if (!form) return;
 
             switch (type) {
                 case "sala":
-                    console.log("Datos recibidos para edición:", data); // Para depuración
 
                     form.roomName.value = data.data.roomname || "";
                     form.roomDescription.value = data.data.description || "";
@@ -415,6 +403,7 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                         data.data.isopen === 1 ? "isOpen" : "isClose";
                     form.wordSource.value =
                         data.data.isgeneral === 1 ? "0" : "1";
+
                     // Mostrar/ocultar el selector de listas según la fuente de palabras
                     const wordListDiv = document.getElementById("wordList");
                     if (wordListDiv) {
@@ -684,11 +673,6 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
 
         async function addWordsToRoom(roomId, wordIds) {
             try {
-                console.log("Enviando palabras al servidor:", {
-                    roomId,
-                    wordIds,
-                }); // Log frontend
-
                 const response = await fetch(
                     `${window.API_URL}/api/rooms/words`,
                     {
@@ -728,7 +712,6 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
         }
 
         function populateWordListSelect(lists) {
-            console.log("Listas recibidas:", lists.data);
 
             const selectList = document.getElementById("wordListSelect");
 
@@ -748,7 +731,6 @@ if (!select || !["sala", "lista", "palabra"].includes(select)) {
                     selectList.appendChild(option);
                 });
             } else {
-                console.log("No hay listas disponibles");
                 const option = document.createElement("option");
                 option.value = "0";
                 option.textContent = "No tienes listas creadas";
