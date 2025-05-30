@@ -86,68 +86,87 @@ import '../assets/css/login.css';
   <script is:inline>
     // Función para verificar sesión
     async function checkSession() {
-      try {
-        const response = await fetch(`${window.API_URL}/api/check-session`, {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.isLoggedIn) {
-            window.location.href = '/dashboard';
-          }
-        }
-      } catch (error) {
-        console.error('Error verificando sesión:', error);
-      }
-    }
-
-    // Verificar sesión al cargar
-    document.addEventListener('DOMContentLoaded', checkSession);
-
-    // Manejar login
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      console.log(email);
-      console.log(password);
-  
-      try {
-        const response = await fetch(`${window.API_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-          credentials: 'include'
-        });
-    
-        const data = await response.json();
-    
-        if (response.ok && data.success) {
-          // Guardar datos básicos del usuario en sessionStorage
-          sessionStorage.setItem('userData', JSON.stringify(data.user));
-          window.location.href = '/dashboard';
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error!",
-            text: data.message || "Credenciales incorrectas",
-            confirmButtonColor: "#000000",
-          });
-        }
-      } catch (error) {
-        console.error('Error en login:', error);
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: "No se pudo conectar con el servidor",
-          confirmButtonColor: "#000000",
-        });
+  try {
+    const response = await fetch(`${window.API_URL}/api/check-session`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
       }
     });
+
+    if (!response.ok) {
+      throw new Error('Error en la verificación de sesión');
+    }
+
+    const data = await response.json();
+    
+    if (data.isLoggedIn) {
+      // Guardar datos mínimos en sessionStorage
+      sessionStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem('userId', data.userId);
+      
+      // Redirigir solo si estamos en la página de login
+      if (window.location.pathname === '/login') {
+        window.location.href = '/dashboard';
+      }
+    } else {
+      // Limpiar datos de sesión si no está autenticado
+      sessionStorage.removeItem('isAuthenticated');
+      sessionStorage.removeItem('userId');
+    }
+  } catch (error) {
+    console.error('Error verificando sesión:', error);
+    sessionStorage.clear();
+  }
+}
+
+// Verificar sesión al cargar
+document.addEventListener('DOMContentLoaded', checkSession);
+
+// Manejar login
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!email || !password) {
+    return Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: "Email y contraseña son requeridos",
+      confirmButtonColor: "#000000",
+    });
+  }
+
+  try {
+    const response = await fetch(`${window.API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      }),
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message || 'Error en login');
+
+    // Guardar solo datos no sensibles
+    sessionStorage.setItem('userData', JSON.stringify(data.user));
+    window.location.href = '/dashboard';
+
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error!",
+      text: error.message || "Error al iniciar sesión",
+      confirmButtonColor: "#000000",
+    });
+  }
+});
   </script>
 </Layout>
