@@ -1,10 +1,14 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 import "../assets/css/inforoom.css";
 import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 ---
+
 <Layout>
-    <a href="/dashboard"><button type="button" class="btn btn-danger regresar">Regresar</button></a>
+    <a href="/dashboard"
+        ><button type="button" class="btn btn-danger regresar">Regresar</button
+        ></a
+    >
     <div class="salas" id="tabla-de-posisciones">
         <div id="sala_editar" class="content">
             <h2>Tu sala</h2>
@@ -50,22 +54,57 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             </div>
 
             <div class="botones">
-                <button type="button" class="btn btn-success regresar" onclick="loadWordsList()">Lista de palabras</button>
-                <button type="button" class="btn btn-success regresar" onclick="loadFailsByType()">Palabras falladas por tipo</button>
-                <button type="button" class="btn btn-success regresar" onclick="loadFailsByPast()">Palabras falladas por pasado</button>
-                <button type="button" class="btn btn-success regresar" onclick="loadInactiveWords()">Palabras inactivas</button>
-                <button type="button" class="btn btn-success regresar" onclick="genPDF()">Descargar PDF</button>
+                <button
+                    type="button"
+                    class="btn btn-success regresar"
+                    onclick="loadWordsList()">Lista de palabras</button
+                >
+                <button
+                    type="button"
+                    class="btn btn-success regresar"
+                    onclick="loadFailsByType()"
+                    >Palabras falladas por tipo</button
+                >
+                <button
+                    type="button"
+                    class="btn btn-success regresar"
+                    onclick="loadFailsByPast()"
+                    >Palabras falladas por pasado</button
+                >
+                <button
+                    type="button"
+                    class="btn btn-success regresar"
+                    onclick="loadInactiveWords()">Palabras inactivas</button
+                >
+                <button
+                    type="button"
+                    class="btn btn-success regresar"
+                    onclick="genPDF()">Descargar PDF</button
+                >
             </div>
         </div>
     </div>
 
     <!-- Modal para detalles de jugador -->
-    <div class="modal fade" id="playerDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div
+        class="modal fade"
+        id="playerDetailsModal"
+        tabindex="-1"
+        role="dialog"
+        aria-hidden="true"
+    >
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="playerModalTitle">Detalles del jugador</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="playerModalTitle">
+                        Detalles del jugador
+                    </h5>
+                    <button
+                        type="button"
+                        class="close"
+                        onclick="closePlayerModal()"
+                        aria-label="Close"
+                    >
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -87,19 +126,36 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="closePlayerModal()">Cerrar</button
+                    >
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal para listas de palabras -->
-    <div class="modal fade" id="wordsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div
+        class="modal fade"
+        id="wordsModal"
+        tabindex="-1"
+        role="dialog"
+        aria-hidden="true"
+    >
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="wordsModalTitle">Lista de palabras</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="wordsModalTitle">
+                        Lista de palabras
+                    </h5>
+                    <button
+                        type="button"
+                        class="close"
+                        onclick="closeWordsModal()"
+                        aria-label="Close"
+                    >
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -121,24 +177,35 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="closeWordsModal()">Cerrar</button
+                    >
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    ></script>
+    <script
+        src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.js"
+    ></script>
 
     <script>
         // Accede a la variable inyectada por Astro
         const apiUrl = import.meta.env.PUBLIC_API_URL;
         window.API_URL = apiUrl;
-      </script>
+    </script>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -150,9 +217,14 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         window.loadInactiveWords = loadInactiveWords;
         window.genPDF = genPDF;
         window.showPlayerDetails = showPlayerDetails;
-        
+
         // Cargar datos iniciales al abrir la página
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+            const storedUserData = sessionStorage.getItem("userData");
+            if (!storedUserData) {
+                window.location.href = "/login";
+                return;
+            }
             await loadRoomInfo();
             await loadPlayers();
         });
@@ -160,28 +232,39 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         // Función para cargar la información de la sala
         async function loadRoomInfo() {
             try {
-                const response = await fetch(`${window.API_URL}/api/rooms/room?roomId=${id}`);
-                if (!response.ok) throw new Error('Error al cargar datos de la sala');
-                
+                const response = await fetch(
+                    `${window.API_URL}/api/rooms/room?roomId=${id}`,
+                );
+                if (!response.ok)
+                    throw new Error("Error al cargar datos de la sala");
+
                 const roomDatas = await response.json();
                 const roomData = roomDatas.data;
 
-                const wordsResponse = await fetch(`${window.API_URL}/api/rooms/${id}/words`);
-                if (!wordsResponse.ok) throw new Error('Error al cargar palabras');
-                
+                const wordsResponse = await fetch(
+                    `${window.API_URL}/api/rooms/${id}/words`,
+                );
+                if (!wordsResponse.ok)
+                    throw new Error("Error al cargar palabras");
+
                 const wordsData = await wordsResponse.json();
                 const wordsCount = wordsData.words.length;
 
-                const playersResponse = await fetch(`${window.API_URL}/api/rooms/${id}/players`);
-                if (!playersResponse.ok) throw new Error('Error al cargar jugadores');
-                
+                const playersResponse = await fetch(
+                    `${window.API_URL}/api/rooms/${id}/players`,
+                );
+                if (!playersResponse.ok)
+                    throw new Error("Error al cargar jugadores");
+
                 const playersData = await playersResponse.json();
                 const playersCount = playersData.players.length;
-                
-                const qrString = roomData.qrstring || `${window.location.origin}/unirseSala?codigo=${roomData.roomcode}`;
+
+                const qrString =
+                    roomData.qrstring ||
+                    `${window.location.origin}/unirseSala?codigo=${roomData.roomcode}`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&format=png&data=${encodeURIComponent(qrString)}`;
 
-                document.getElementById('roomInfo').innerHTML = `
+                document.getElementById("roomInfo").innerHTML = `
                     <tr>
                         <td>Codigo de sala</td>
                         <td>${roomData.roomcode}</td>
@@ -211,7 +294,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                     </tr>
                     <tr>
                         <td>Abierto</td>
-                        <th>${roomData.isopen ? 'Si' : 'No'}</th>
+                        <th>${roomData.isopen ? "Si" : "No"}</th>
                     </tr>
                     <tr>
                         <td>Creado el:</td>
@@ -219,7 +302,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                     </tr>
                     <tr>
                         <td>Hora de apertura?</td>
-                        <th>${roomData.hasstartdatetime ? 'Si' : 'No'}</th>
+                        <th>${roomData.hasstartdatetime ? "Si" : "No"}</th>
                     </tr>
                     <tr>
                         <td>Hora apertura</td>
@@ -227,41 +310,43 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                     </tr>
                     <tr>
                         <td>Hora de cierre?</td>
-                        <th>${roomData.hasenddatetime ? 'Si' : 'No'}</th>
+                        <th>${roomData.hasenddatetime ? "Si" : "No"}</th>
                     </tr>
                     <tr>
                         <td>Hora cierre</td>
                         <th>${formatDate(roomData.enddatetime)}</th>
                     </tr>
                 `;
-                
-                if (typeof QRCode !== 'undefined' && roomData.qrstring) {
+
+                if (typeof QRCode !== "undefined" && roomData.qrstring) {
                     new QRCode(document.getElementById("qrcode"), {
                         text: roomData.qrstring,
                         width: 100,
                         height: 100,
                         colorDark: "#000000",
                         colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.L
+                        correctLevel: QRCode.CorrectLevel.L,
                     });
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar la información de la sala');
+                console.error("Error:", error);
+                alert("Error al cargar la información de la sala");
             }
         }
 
         // Función para cargar la lista de jugadores
         async function loadPlayers() {
             try {
-                const response = await fetch(`${window.API_URL}/api/rooms/${id}/players`);
-                if (!response.ok) throw new Error('Error al cargar jugadores');
-                
+                const response = await fetch(
+                    `${window.API_URL}/api/rooms/${id}/players`,
+                );
+                if (!response.ok) throw new Error("Error al cargar jugadores");
+
                 const players = await response.json();
                 const playersData = players.players;
-                
-                let html = '';
-                
+
+                let html = "";
+
                 playersData.forEach((player, index) => {
                     html += `
                         <tr>
@@ -278,43 +363,47 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                         </tr>
                     `;
                 });
-                
-                document.getElementById('playersTable').innerHTML = html;
+
+                document.getElementById("playersTable").innerHTML = html;
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar la lista de jugadores');
+                console.error("Error:", error);
+                alert("Error al cargar la lista de jugadores");
             }
         }
 
         // Función para mostrar detalles de un jugador
         async function showPlayerDetails(gameroomId, playerName) {
             try {
-                const response = await fetch(`${window.API_URL}/api/rooms/infoUser/${gameroomId}`);
-                if (!response.ok) throw new Error('Error al cargar detalles del jugador');
-                
+                const response = await fetch(
+                    `${window.API_URL}/api/rooms/infoUser/${gameroomId}`,
+                );
+                if (!response.ok)
+                    throw new Error("Error al cargar detalles del jugador");
+
                 const detailsData = await response.json();
                 const details = detailsData.player;
-                let html = '';
-                
-                details.forEach(detail => {
+                let html = "";
+
+                details.forEach((detail) => {
                     html += `
                         <tr>
                             <td>${detail.word}</td>
-                            <td>${detail.guessed ? 'Si' : 'No'}</td>
-                            <td>${detail.typecorrect ? 'Correcto' : 'Incorrecto'}</td>
-                            <td>${detail.pastcorrect ? 'Correcto' : 'Incorrecto'}</td>
+                            <td>${detail.guessed ? "Si" : "No"}</td>
+                            <td>${detail.typecorrect ? "Correcto" : "Incorrecto"}</td>
+                            <td>${detail.pastcorrect ? "Correcto" : "Incorrecto"}</td>
                             <td>${detail.timeperword}</td>
                             <td>${detail.pointsperword}</td>
                         </tr>
                     `;
                 });
-                
-                document.getElementById('playerModalTitle').textContent = `Palabras de ${playerName}`;
-                document.getElementById('playerDetailsBody').innerHTML = html;
-                $('#playerDetailsModal').modal('show');
+
+                document.getElementById("playerModalTitle").textContent =
+                    `Palabras de ${playerName}`;
+                document.getElementById("playerDetailsBody").innerHTML = html;
+                $("#playerDetailsModal").modal("show");
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar los detalles del jugador');
+                console.error("Error:", error);
+                alert("Error al cargar los detalles del jugador");
             }
         }
 
@@ -322,24 +411,24 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         async function loadWordsList() {
             try {
                 const response = await fetch(
-              `${window.API_URL}/api/words/room`,
-              {
-                method: "POST", // Cambiado a POST para enviar en el body
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  roomid: id, // Envías el roomid en el body
-                }),
-              },
-            );
-                if (!response.ok) throw new Error('Error al cargar lista de palabras');
-                
+                    `${window.API_URL}/api/words/room`,
+                    {
+                        method: "POST", // Cambiado a POST para enviar en el body
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            roomid: id, // Envías el roomid en el body
+                        }),
+                    },
+                );
+                if (!response.ok)
+                    throw new Error("Error al cargar lista de palabras");
+
                 const words = await response.json();
-                console.log(words);
-                let html = '';
-                
-                words.forEach(word => {
+                let html = "";
+
+                words.forEach((word) => {
                     html += `
                         <tr>
                             <td>${word.word}</td>
@@ -351,28 +440,33 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                         </tr>
                     `;
                 });
-                
-                document.getElementById('wordsModalTitle').textContent = 'Lista de palabras';
-                document.getElementById('extraColumnHeader').textContent = '';
-                document.getElementById('wordsModalBody').innerHTML = html;
-                $('#wordsModal').modal('show');
+
+                document.getElementById("wordsModalTitle").textContent =
+                    "Lista de palabras";
+                document.getElementById("extraColumnHeader").textContent = "";
+                document.getElementById("wordsModalBody").innerHTML = html;
+                $("#wordsModal").modal("show");
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar la lista de palabras');
+                console.error("Error:", error);
+                alert("Error al cargar la lista de palabras");
             }
         }
 
         // Función para cargar palabras falladas por tipo
         async function loadFailsByType() {
             try {
-                const response = await fetch(`${window.API_URL}/api/words/failsType/${id}`);
-                if (!response.ok) throw new Error('Error al cargar palabras falladas por tipo');
-                
+                const response = await fetch(
+                    `${window.API_URL}/api/words/failsType/${id}`,
+                );
+                if (!response.ok)
+                    throw new Error(
+                        "Error al cargar palabras falladas por tipo",
+                    );
+
                 const words = await response.json();
-                console.log(words);
-                let html = '';
-                
-                words.forEach(word => {
+                let html = "";
+
+                words.forEach((word) => {
                     html += `
                         <tr>
                             <td>${word.word}</td>
@@ -384,27 +478,34 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                         </tr>
                     `;
                 });
-                
-                document.getElementById('wordsModalTitle').textContent = 'Palabras falladas por tipo';
-                document.getElementById('extraColumnHeader').textContent = 'Fallos';
-                document.getElementById('wordsModalBody').innerHTML = html;
-                $('#wordsModal').modal('show');
+
+                document.getElementById("wordsModalTitle").textContent =
+                    "Palabras falladas por tipo";
+                document.getElementById("extraColumnHeader").textContent =
+                    "Fallos";
+                document.getElementById("wordsModalBody").innerHTML = html;
+                $("#wordsModal").modal("show");
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar palabras falladas por tipo');
+                console.error("Error:", error);
+                alert("Error al cargar palabras falladas por tipo");
             }
         }
 
         // Función para cargar palabras falladas por pasado
         async function loadFailsByPast() {
             try {
-                const response = await fetch(`${window.API_URL}/api/words/failsPast/${id}`);
-                if (!response.ok) throw new Error('Error al cargar palabras falladas por pasado');
-                
+                const response = await fetch(
+                    `${window.API_URL}/api/words/failsPast/${id}`,
+                );
+                if (!response.ok)
+                    throw new Error(
+                        "Error al cargar palabras falladas por pasado",
+                    );
+
                 const words = await response.json();
-                let html = '';
-                
-                words.forEach(word => {
+                let html = "";
+
+                words.forEach((word) => {
                     html += `
                         <tr>
                             <td>${word.word}</td>
@@ -416,27 +517,32 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                         </tr>
                     `;
                 });
-                
-                document.getElementById('wordsModalTitle').textContent = 'Palabras falladas por pasado';
-                document.getElementById('extraColumnHeader').textContent = 'Fallos';
-                document.getElementById('wordsModalBody').innerHTML = html;
-                $('#wordsModal').modal('show');
+
+                document.getElementById("wordsModalTitle").textContent =
+                    "Palabras falladas por pasado";
+                document.getElementById("extraColumnHeader").textContent =
+                    "Fallos";
+                document.getElementById("wordsModalBody").innerHTML = html;
+                $("#wordsModal").modal("show");
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar palabras falladas por pasado');
+                console.error("Error:", error);
+                alert("Error al cargar palabras falladas por pasado");
             }
         }
 
         // Función para cargar palabras inactivas
         async function loadInactiveWords() {
             try {
-                const response = await fetch(`${window.API_URL}/api/words/inactive/${id}`);
-                if (!response.ok) throw new Error('Error al cargar palabras inactivas');
-                
+                const response = await fetch(
+                    `${window.API_URL}/api/words/inactive/${id}`,
+                );
+                if (!response.ok)
+                    throw new Error("Error al cargar palabras inactivas");
+
                 const words = await response.json();
-                let html = '';
-                
-                words.forEach(word => {
+                let html = "";
+
+                words.forEach((word) => {
                     html += `
                         <tr>
                             <td>${word.word}</td>
@@ -448,20 +554,22 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                         </tr>
                     `;
                 });
-                
-                document.getElementById('wordsModalTitle').textContent = 'Palabras inactivas';
-                document.getElementById('extraColumnHeader').textContent = 'Uso';
-                document.getElementById('wordsModalBody').innerHTML = html;
-                $('#wordsModal').modal('show');
+
+                document.getElementById("wordsModalTitle").textContent =
+                    "Palabras inactivas";
+                document.getElementById("extraColumnHeader").textContent =
+                    "Uso";
+                document.getElementById("wordsModalBody").innerHTML = html;
+                $("#wordsModal").modal("show");
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al cargar palabras inactivas');
+                console.error("Error:", error);
+                alert("Error al cargar palabras inactivas");
             }
         }
 
         // Función para formatear fechas
         function formatDate(dateString) {
-            if (!dateString) return '';
+            if (!dateString) return "";
             const date = new Date(dateString);
             return date.toLocaleString();
         }
@@ -469,14 +577,27 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         // Función para generar PDF
         function genPDF() {
             const timestamp = new Date();
-            let mostrar = document.getElementById('timestamp');
-            mostrar.innerHTML = timestamp.getHours() + ":" + timestamp.getMinutes() + ":" + timestamp.getSeconds() + "</br>" + timestamp.getDate() + "/" + (timestamp.getMonth() + 1) + "/" + timestamp.getFullYear();
-            
-            var maintable = document.getElementById('tabla-de-posisciones');
-            var doc = new jsPDF('p', 'pt', 'letter');
+            let mostrar = document.getElementById("timestamp");
+            mostrar.innerHTML =
+                timestamp.getHours() +
+                ":" +
+                timestamp.getMinutes() +
+                ":" +
+                timestamp.getSeconds() +
+                "</br>" +
+                timestamp.getDate() +
+                "/" +
+                (timestamp.getMonth() + 1) +
+                "/" +
+                timestamp.getFullYear();
+
+            var maintable = document.getElementById("tabla-de-posisciones");
+            var doc = new jsPDF("p", "pt", "letter");
             var margin = 20;
-            var scale = (doc.internal.pageSize.width - margin * 2) / document.body.clientWidth;
-            
+            var scale =
+                (doc.internal.pageSize.width - margin * 2) /
+                document.body.clientWidth;
+
             doc.html(maintable, {
                 x: margin,
                 y: margin,
@@ -484,13 +605,42 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
                     scale: scale,
                 },
                 callback: function (doc) {
-                    doc.save('Tabla_de_Posiciones.pdf');
-                }
+                    doc.save("Tabla_de_Posiciones.pdf");
+                },
             });
-            
+
             setTimeout(function () {
                 mostrar.innerHTML = "";
             }, 1);
         }
+
+        window.closePlayerModal = function () {
+            $("#playerDetailsModal").modal("hide");
+        };
+
+        window.closeWordsModal = function () {
+            $("#wordsModal").modal("hide");
+        };
+
+        // Event listener que se ejecuta cuando el DOM está completamente cargado
+        document.addEventListener("DOMContentLoaded", function () {
+            // Esperar un poco más para que Bootstrap se inicialice completamente
+            setTimeout(function () {
+                // Agregar event listeners a todos los botones de cerrar
+                const closeButtons = document.querySelectorAll(
+                    '.close, [data-dismiss="modal"]',
+                );
+
+                closeButtons.forEach(function (button) {
+                    button.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        const modal = this.closest(".modal");
+                        if (modal) {
+                            $(modal).modal("hide");
+                        }
+                    });
+                });
+            }, 500); // Esperar 500ms para que Bootstrap se inicialice
+        });
     </script>
 </Layout>

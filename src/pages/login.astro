@@ -40,6 +40,16 @@ import '../assets/css/login.css';
         </div>
       </div>
       <div class="box-root padding-top--24 flex-flex flex-direction--column" style="flex-grow: 1; z-index: 9;">
+        <!-- Botón de regreso -->
+        <div class="back-button-container">
+          <a href="/" class="back-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Volver al inicio
+          </a>
+        </div>
+        
         <div class="box-root padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center">
           <h1><a href="/" rel="dofollow"></a></h1>
         </div>
@@ -74,6 +84,62 @@ import '../assets/css/login.css';
       </div>
     </div>
   </div>
+
+  <!-- Estilos para el botón de regreso -->
+  <style>
+    .back-button-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      color: #374151;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 1);
+      border-color: rgba(0, 0, 0, 0.2);
+      color: #111827;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-button svg {
+      transition: transform 0.2s ease;
+    }
+
+    .back-button:hover svg {
+      transform: translateX(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .back-button-container {
+        top: 15px;
+        left: 15px;
+      }
+      
+      .back-button {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+    }
+  </style>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" crossorigin="anonymous"></script>
 

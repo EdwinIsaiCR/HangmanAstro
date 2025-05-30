@@ -57,10 +57,12 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
 
             //obtener datos del usuario
             const storedUserData = sessionStorage.getItem("userData");
-            if (storedUserData) {
-                const userData = JSON.parse(storedUserData);
-                userId = userData.id;
+            if (!storedUserData) {
+                window.location.href = "/login";
+                return;
             }
+            const userData = JSON.parse(storedUserData);
+            userId = userData.id;
 
             // Cargar palabras del usuario y palabras en la lista
             async function loadWords() {
@@ -149,51 +151,75 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             // Manejar la actualización de la lista
             updateListBtn.addEventListener("click", async () => {
                 try {
-                    const checkboxes =
-                        document.querySelectorAll(".checkbox:checked");
-                    const selectedWordIds = Array.from(checkboxes).map((cb) =>
-                        parseInt(cb.dataset.wordId),
-                    );
+                    const checkboxes = document.querySelectorAll(".checkbox");
+                    const selectedWordIds = Array.from(checkboxes)
+                        .filter((cb) => cb.checked)
+                        .map((cb) => parseInt(cb.dataset.wordId));
 
-                    // Validar que hay palabras seleccionadas
-                    if (selectedWordIds.length === 0) {
-                        alert("Selecciona al menos una palabra");
-                        return;
-                    }
+                    // Obtener IDs de palabras que estaban en la lista pero ahora están desmarcadas
+                    const wordsToRemove = wordsInList
+                        .map((w) => w.id || w.word_id || w.wordId)
+                        .filter(
+                            (id) => !selectedWordIds.includes(parseInt(id)),
+                        );
 
-                    const sendData = {
-                        listId: parseInt(idLista),
-                        wordIds: selectedWordIds,
-                    };
-
-                    const response = await fetch(
-                        `${window.API_URL}/api/lists/words`,
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    // Primero, eliminar las palabras deseleccionadas
+                    if (wordsToRemove.length > 0) {
+                        const deletePromises = wordsToRemove.map(
+                            async (wordId) => {
+                                const deleteResponse = await fetch(
+                                    `${window.API_URL}/api/lists/words?listId=${idLista}&wordId=${wordId}`,
+                                    {
+                                        method: "DELETE",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                        },
+                                    },
+                                );
+                                return deleteResponse.json();
                             },
-                            body: JSON.stringify(sendData),
-                        },
-                    );
-
-                    const responseData = await response.json();
-
-                    if (response.ok) {
-                        alert(
-                            responseData.message ||
-                                "Lista actualizada correctamente",
                         );
-                        window.location.href = "/dashboard";
-                    } else {
-                        alert(
-                            `Error: ${responseData.message || "Error al actualizar la lista"}`,
-                        );
+
+                        await Promise.all(deletePromises);
                     }
+
+                    // Luego, agregar las nuevas palabras seleccionadas (solo si hay)
+                    if (selectedWordIds.length > 0) {
+                        const sendData = {
+                            listId: parseInt(idLista),
+                            wordIds: selectedWordIds,
+                        };
+
+                        const response = await fetch(
+                            `${window.API_URL}/api/lists/words`,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                },
+                                body: JSON.stringify(sendData),
+                            },
+                        );
+
+                        const responseData = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(
+                                responseData.message ||
+                                    "Error al agregar palabras",
+                            );
+                        }
+                    }
+
+                    alert("Lista actualizada correctamente");
+                    window.location.href = "/dashboard";
                 } catch (error) {
                     console.error("Error:", error);
-                    alert("Error de conexión al actualizar la lista");
+                    alert(
+                        `Error: ${error.message || "Error al actualizar la lista"}`,
+                    );
                 }
             });
 

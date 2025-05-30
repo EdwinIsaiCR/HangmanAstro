@@ -49,6 +49,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
             <div class="modal-footer">
               <button
                 type="button"
+                id="btnCancelar"
                 class="btn btn-secondary"
                 data-bs-dismiss="modal">Cancelar</button
               >
@@ -322,6 +323,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           this.dom = {
             loading: document.getElementById("loading"),
             roomDataForm: document.getElementById("roomDataForm"),
+            btnCancelar: document.getElementById("btnCancelar"),
             btnJugar: document.getElementById("btnJugar"),
             spanVidas: document.querySelector(".spanVidas"),
             spanPuntos: document.querySelector(".spanPuntos"),
@@ -351,6 +353,9 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         },
 
         setupEventListeners: function () {
+          this.dom.btnCancelar?.addEventListener("click", () => {
+            window.location.href = "/unirseSala";
+          });
           this.dom.btnJugar?.addEventListener("click", (e) => {
             e.preventDefault();
             this.aJugar();

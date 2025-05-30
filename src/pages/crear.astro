@@ -160,10 +160,12 @@ const select = url.searchParams.get("select");
         setupFormToggles();
 
         const storedUserData = sessionStorage.getItem("userData");
-        if (storedUserData) {
-            const userData = JSON.parse(storedUserData);
-            userId = userData.id;
+        if (!storedUserData) {
+            window.location.href = "/login";
+            return;
         }
+        const userData = JSON.parse(storedUserData);
+        userId = userData.id;
         
         // Cargar listas del usuario si es necesario
         if (document.getElementById('wordListSelect')) {
