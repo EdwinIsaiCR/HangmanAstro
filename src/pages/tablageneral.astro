@@ -84,7 +84,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           <td>${registro.player}</td>
           <td>${registro.score}</td>
           <td>${registro.totaltime}</td>
-          <td>${registro.giveup === 1 ? "Se rindió" : "Acabó vidas"}</td>
+          <td>${registro.giveup.data[0] === 1 ? "Se rindió" : registro.giveup.data[0] === 2 ? "Acabó verbos" : "Acabó vidas"}</td>
         `;
         tableBody.appendChild(row);
       });

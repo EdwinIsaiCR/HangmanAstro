@@ -312,6 +312,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
         pistaDespuesDe: 3,
         perdioLasVidas: false,
         seRindio: false,
+        acaboVerbos: false,
         errores: 0,
         aciertos: 0,
         intentos: 6,
@@ -342,8 +343,9 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           const n = this.verbos.length;
 
           if (n == 0) {
+            this.acaboVerbos = true;
             this.terminar();
-            return null;
+            return;
           }
 
           const key = this.randomKey(n);
@@ -577,7 +579,7 @@ import "../assets/bootstrap/themes/sketchy/bootstrap.css";
           this.divBotones.classList.add("d-none");
 
           const idSend = this.datosjuego[0]?.id || 0;
-          const rindioSend = this.seRindio ? 1 : 0;
+          const rindioSend = this.seRindio ? 1 : this.acaboVerbos ? 2 : 0;
           const puntosSend = this.seRindio ? 0 : this.puntos;
           const datosEnviar = {
             id: idSend,
