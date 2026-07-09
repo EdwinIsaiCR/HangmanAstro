@@ -12,5 +12,8 @@
     "@astrojs/vercel": "^8.1.4",
     "astro": "^5.7.10",
     "qrcode": "^1.5.4"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }
